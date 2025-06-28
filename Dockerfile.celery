@@ -1,0 +1,21 @@
+FROM python:3.12
+
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /code
+
+COPY requirements.txt /code/
+
+RUN \
+   apt-get -y update && apt-get -y upgrade && apt-get -y dist-upgrade 
+
+RUN \
+    pip install --upgrade pip setuptools wheel \
+    && pip install --upgrade pip \
+    && pip install --upgrade pip setuptools wheel
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./bolbol .
+
+CMD ["celery", "-A", "bolbol", "worker", "-l", "INFO"]

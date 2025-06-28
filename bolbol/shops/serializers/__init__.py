@@ -1,0 +1,1 @@
+from .shop_serializer import *

@@ -1,0 +1,160 @@
+{
+    "Nəqliyyat": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Daşınmaz əmlak": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Geyim": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Uşaq aləmi": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Kosmetika və sağlamlıq": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "İş elanları": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Elektronika": {
+        "isParentCategory": true,
+        "subcategories": {
+            "Telefonlar": {
+                "autoGenerateProductName": true,
+                "isSubcategory": true,
+                "defaultFilters": {
+                  "showPrice": true,
+                  "showIsNew": true,
+                  "showIsDeliveryAvailable": true,
+                  "showIsBarterAvailable": true,
+                  "showIsCreditAvailable": true,
+                  "showIsViaNegotiator": true
+                },
+                "filters": [
+                  {
+                    "id": "brand",
+                    "name": "Marka",
+                    "type": "select",
+                    "useForProductName": true,
+                    "options": [
+                      {
+                        "id": "acer",
+                        "name": "Acer",
+                        "childFilters": [
+                          {
+                            "id": "model",
+                            "name": "Model",
+                            "type": "select",
+                            "useForProductName": true,
+                            "options": [
+                              {
+                                "id": "dx650",
+                                "name": "DX650",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "predator8",
+                                "name": "Predator 8",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "memory",
+                                    "name": "Yaddas",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "32gb_2gb",
+                                        "name": "32gb/2gb"
+                                      },
+                                      {
+                                        "id": "64gb_2gb",
+                                        "name": "64gb/2gb"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "id": "accessories",
+                        "name": "Aksesuarlar"
+                      },
+                      {
+                        "id": "oppo",
+                        "name": "OPPO"
+                      },
+                      {
+                        "id": "aiek",
+                        "name": "Aiek"
+                      }
+                    ]
+                  }
+                ]
+            },
+            "AnotherSubcategory": {}
+        }
+    },
+    "Ev və Bağ üçün": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Ərzaq": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Heyvan, Bitki": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "İdman, musiqi, hobbi": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Digər": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Xidmətlər": {
+        "isParentCategory": true,
+        "subcategories": {}
+    },
+    "Pulsuz": {
+        "isParentCategory": true,
+        "subcategories": {}
+    }
+}
