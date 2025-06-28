@@ -56,3 +56,4 @@ wcwidth==0.2.13
 zope.interface==7.2
 django-elasticsearch-dsl
 gunicorn
+django-cors-headers

@@ -46,7 +46,7 @@ if DEBUG:
         "*",
     ]
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies & authorization headers
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 # CORS_ALLOW_HEADERS = ["*"]
@@ -63,12 +63,14 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True  
 CSRF_TRUSTED_ORIGINS = [
+    "https://pi.backend.az",
     "http://localhost:8000",  # Local development
     "https://konum24.az",     # Production
     "https://www.konum24.az",     # Production
     'https://bolbol-three.vercel.app/',
     'http://bolbol-three.vercel.app/',
 ]
+
 
 # CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
 CSRF_COOKIE_SECURE = True
@@ -78,6 +80,7 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = True
 
 # Application definition
 
@@ -99,6 +102,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "redis",
     'django_elasticsearch_dsl',
+    "corsheaders",
 
     # Apps
     "users",
@@ -283,4 +287,15 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-
+#swagger configrations
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+        }
+    },
+    "USE_SESSION_AUTH": False,
+    "DEFAULT_API_URL": "https://https://pi.backend.az/",
+}
