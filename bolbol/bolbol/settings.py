@@ -102,7 +102,6 @@ INSTALLED_APPS = [
     "django_celery_results",
     "redis",
     'django_elasticsearch_dsl',
-    "corsheaders",
 
     # Apps
     "users",
