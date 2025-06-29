@@ -68,6 +68,7 @@ services:
     volumes:
       - ./static:/app/static
       - ./uploads:/app/uploads
+      - /etc/letsencrypt:/etc/letsencrypt 
     networks:
       - backend
 
