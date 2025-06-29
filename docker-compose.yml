@@ -69,7 +69,7 @@ services:
     volumes:
       - ./static:/app/static
       - ./uploads:/app/uploads
-      - /etc/letsencrypt:/etc/letsencrypt 
+      - ./nginx/certs:/etc/letsencrypt/live/pi.backend.az
     networks:
       - backend
 
