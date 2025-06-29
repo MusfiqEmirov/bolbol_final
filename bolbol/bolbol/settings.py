@@ -297,5 +297,5 @@ SWAGGER_SETTINGS = {
         }
     },
     "USE_SESSION_AUTH": False,
-    "DEFAULT_API_URL": "https://https://pi.backend.az/",
+    "DEFAULT_API_URL": "https://pi.backend.az/",
 }
