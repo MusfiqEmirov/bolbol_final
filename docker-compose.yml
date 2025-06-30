@@ -63,13 +63,11 @@ services:
     restart: always
     ports:
       - "80:80"
-      - "443:443"
     depends_on:
       - web
     volumes:
       - ./static:/app/static
       - ./uploads:/app/uploads
-      - ./nginx/certs:/etc/letsencrypt/live/pi.backend.az
     networks:
       - backend
 
