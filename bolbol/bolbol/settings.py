@@ -66,12 +66,12 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = "https://pi.backend.az"
 CSRF_TRUSTED_ORIGINS = [
     "https://pi.backend.az",
     "http://localhost:8000",
-    "https://konum24.az",
-    "https://www.konum24.az",
+    # "https://konum24.az",
+    # "https://www.konum24.az",
     "https://bolbol-three.vercel.app",
     "http://bolbol-three.vercel.app",
 ]
