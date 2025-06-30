@@ -42,7 +42,7 @@ ALLOWED_HOSTS = [
 ]
 
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -281,7 +281,7 @@ ELASTICSEARCH_DSL = {
 # Swagger configurations
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Bearer": {
+        "bolbol": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header",
