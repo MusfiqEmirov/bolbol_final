@@ -31,14 +31,15 @@ from rest_framework_simplejwt.views import (
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include('apis.urls_v1'))
+    path("admin/", admin.site.urls),
+    path("api/v1/", include("apis.urls_v1")),
+    # Add a root URL to avoid 404s or unintended redirects
+    path("", lambda request: {"status": "OK"}, name="root"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -51,12 +52,9 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    # url="https://pi.backend.az",  # istəyə uyğun şərh et
-    # schemes=["https", "http"],    # bu sətri tamamilə sil
 )
 
 urlpatterns += [
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
-
