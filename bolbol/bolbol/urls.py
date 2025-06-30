@@ -51,9 +51,8 @@ schema_view = get_schema_view(
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
-    # Burada əlavə olunur:
-    url="https://pi.backend.az",  # https ilə domenini yaz
-    schemes=["https", "http"],  # Həm HTTP, həm HTTPS
+    # url="https://pi.backend.az",  # istəyə uyğun şərh et
+    # schemes=["https", "http"],    # bu sətri tamamilə sil
 )
 
 urlpatterns += [
