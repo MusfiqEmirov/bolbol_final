@@ -34,7 +34,6 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("apis.urls_v1")),
     # Add a root URL to avoid 404s or unintended redirects
-    path("", lambda request: {"status": "OK"}, name="root"),
 ]
 
 if settings.DEBUG:
