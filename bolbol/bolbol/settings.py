@@ -296,3 +296,5 @@ SWAGGER_SETTINGS = {
     'PERSIST_AUTH': True,
     'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',  # ← buranı əlavə edə bilərsən
 }
+
+APPEND_SLASH = False
