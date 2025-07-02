@@ -27,48 +27,34 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 DEBUG = True
 PROD = not DEBUG
 
-if DEBUG:
-    ALLOWED_HOSTS = [
-        "127.0.0.1",
-        'pi.backend.az',
-        'localhost',
-        "*",
-    ]
-else:
-    ALLOWED_HOSTS = [
-        "pi.backend.az",
-    ]
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-CORS_ALLOW_HEADERS = [
-    "accept",
-    "accept-encoding",
-    "authorization",
-    "content-type",
-    "dnt",
-    "origin",
-    "user-agent",
-    "x-csrftoken",
-    "x-requested-with",
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "pi.backend.az",
 ]
-CORS_ALLOW_ALL_ORIGINS = True  
+
+if PROD:
+    SECURE_SSL_REDIRECT = True
+else:
+    SECURE_SSL_REDIRECT = False
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_SECURE = PROD
+CSRF_COOKIE_SECURE = PROD
+
+SECURE_HSTS_SECONDS = 31536000 if PROD else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = PROD
+SECURE_HSTS_PRELOAD = PROD
+
+# CORS and CSRF settings - lazım olanları əlavə et
+CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "https://konum24.az",
-    "https://www.konum24.az",
-    'https://bolbol-three.vercel.app/',
-    'http://bolbol-three.vercel.app/',
     "https://pi.backend.az",
 ]
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+APPEND_SLASH = True
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
