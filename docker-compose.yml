@@ -71,8 +71,9 @@ services:
     volumes:
       - ./static:/app/static
       - ./uploads:/app/uploads
-      - ./nginx/conf.d:/etc/nginx/conf.d   # Nginx config-ləri mount etmək üçün (əlavə)
-      - ./nginx/ssl:/etc/nginx/ssl 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf    # nginx.conf faylını ayrıca mount edirik
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf  # default.conf faylını ayrıca mount edirik
+      - ./nginx/ssl:/etc/nginx/ssl
     networks:
       - backend
 
