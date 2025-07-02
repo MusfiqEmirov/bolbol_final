@@ -284,4 +284,14 @@ ELASTICSEARCH_DSL = {
     },
 }
 
-
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': None,
+    'DEFAULT_INFO': 'your_project.urls.api_info',
+    'VALIDATOR_URL': None,
+    'DEFAULT_MODEL_RENDERING': 'example',
+    'DOC_EXPANSION': 'none',
+    'PERSIST_AUTH': True,
+    'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',  # ← buranı əlavə edə bilərsən
+}
