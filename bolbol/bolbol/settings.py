@@ -17,55 +17,82 @@ from utils.constants import TimeIntervals
 
 from dotenv import load_dotenv
 
+# Load environment variables from the .env file
 ENV_FILE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 load_dotenv(os.path.join(ENV_FILE_DIR, ".env"))
 
+# Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 
+# SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = True
 PROD = not DEBUG
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "pi.backend.az",
+if DEBUG:
+    ALLOWED_HOSTS = [
+        "127.0.0.1",
+        # "konum24.az",
+        # "www.konum24.az", 
+        # "138.68.109.44",
+        'pi.backend.az',
+        'localhost',
+        "web",
+        "*",
+    ]
+
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies & authorization headers
+CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+# CORS_ALLOW_HEADERS = ["*"]
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
-
-if PROD:
-    SECURE_SSL_REDIRECT = True
-else:
-    SECURE_SSL_REDIRECT = False
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SESSION_COOKIE_SECURE = PROD
-CSRF_COOKIE_SECURE = PROD
-
-SECURE_HSTS_SECONDS = 31536000 if PROD else 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = PROD
-SECURE_HSTS_PRELOAD = PROD
-
-# CORS and CSRF settings - lazım olanları əlavə et
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True  
 CSRF_TRUSTED_ORIGINS = [
-    "https://pi.backend.az",
+    "http://localhost:8000",  # Local development
+    "https://konum24.az",     # Production
+    "https://www.konum24.az",     # Production
+    'https://bolbol-three.vercel.app/',
+    'http://bolbol-three.vercel.app/',
 ]
 
-APPEND_SLASH = True
+# CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Application definition
 
 INSTALLED_APPS = [
-    "corsheaders",
+    "corsheaders",  # Add this at the top of third-party apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    # "daphne",
     "django.contrib.staticfiles",
+
+    # Third party
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_yasg",
@@ -73,6 +100,8 @@ INSTALLED_APPS = [
     "django_celery_results",
     "redis",
     'django_elasticsearch_dsl',
+
+    # Apps
     "users",
     "products",
     "shops",
@@ -91,7 +120,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 ROOT_URLCONF = "bolbol.urls"
 
@@ -113,6 +141,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "bolbol.wsgi.application"
 
+
+# Database
+# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -120,32 +152,59 @@ DATABASES = {
     }
 }
 
+
+# Password validation
+# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
 ]
 
+# Internationalization
+# https://docs.djangoproject.com/en/5.1/topics/i18n/
+
 LANGUAGE_CODE = "en-us"
+
 TIME_ZONE = "Asia/Baku"
+
 USE_I18N = True
+
 USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = "uploads/"
-MEDIA_ROOT = BASE_DIR / "uploads"
+MEDIA_ROOT = BASE_DIR / "uploads"   
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Rest Framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
 }
 
+# JWT
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
     "REFRESH_TOKEN_LIFETIME": timedelta(weeks=2),
@@ -156,18 +215,23 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("bolbol",),
 }
 
+# SMS-notifications
 SMS_URL = os.getenv("SMS_API_URL", "")
 SMS_LOGIN = os.getenv("SMS_LOGIN", "")
 SMS_SENDER = os.getenv("SMS_SENDER", "")
 SMS_PASSWORD = os.getenv("SMS_PASSWORD", "")
 SMS_UNICODE = True
 
+
+# Celery
 CELERY_TIMEZONE = "Asia/Baku"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_RESULT_BACKEND = "django-cache"
+# CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+# CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379")
 CELERY_BROKER_URL = 'redis://redis:6379/0'
-
+# Cache
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
@@ -176,13 +240,34 @@ CACHES = {
     },
 }
 
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'http://elasticsearch:9200'
-    },
-}
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         },
+#     }
+# }
 
-EMAIL_BACKEND = 'bolbol.email_backend.EmailBackend'
+
+# DJRICHTEXTFIELD_CONFIG = {
+#     'js': ['//cdn.tiny.cloud/1/no-api-key/tinymce/5/tinymce.min.js'],
+#     'init_template': 'djrichtextfield/init/tinymce.js',
+#     'settings': {
+#         'toolbar': [
+#             {'items': ['Format', '-', 'Bold', 'Italic', '-',
+#                     'RemoveFormat']},
+#             {'items': ['Link', 'Unlink', 'Image', 'Table']},
+#             {'items': ['Source']}
+#         ],
+#         'format_tags': 'p;h1;h2;h3',
+#         'width': 1000
+#     }
+# }
+
+# E-mail
+EMAIL_BACKEND ='bolbol.email_backend.EmailBackend'
 EMAIL_HOST = 'mail.smtp2go.com'
 EMAIL_PORT = 2525
 EMAIL_HOST_USER = 'noreply@bolbol.az'
@@ -190,6 +275,17 @@ EMAIL_HOST_PASSWORD = 'c2dnbDRoN2phdmkw'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 
+# DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
+# FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
+
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://elasticsearch:9200'
+    },
+}
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
     'SECURITY_DEFINITIONS': None,
@@ -198,5 +294,5 @@ SWAGGER_SETTINGS = {
     'DEFAULT_MODEL_RENDERING': 'example',
     'DOC_EXPANSION': 'none',
     'PERSIST_AUTH': True,
-    'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',
+    'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',  # ← buranı əlavə edə bilərsən
 }
