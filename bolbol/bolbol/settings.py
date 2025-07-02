@@ -64,6 +64,7 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True  
 CSRF_TRUSTED_ORIGINS = [
+    "https://pi.backend.az",
     "http://localhost:8000",  # Local development
     "https://konum24.az",     # Production
     "https://www.konum24.az",     # Production
