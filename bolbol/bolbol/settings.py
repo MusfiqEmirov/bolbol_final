@@ -298,5 +298,5 @@ SWAGGER_SETTINGS = {
     'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',  # ← buranı əlavə edə bilərsən
 }
 
-APPEND_SLASH = True
+APPEND_SLASH = False
 SECURE_SSL_REDIRECT = True
