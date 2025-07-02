@@ -14,8 +14,8 @@ services:
     volumes:
       - ./static:/code/bolbol/static
       - ./uploads:/code/bolbol/uploads
-    ports:
-      - "80:8000"
+    # ports:
+    #   - "80:8000"
     networks:
       - backend
     command: gunicorn bolbol.wsgi:application --bind 0.0.0.0:8000
@@ -57,21 +57,24 @@ services:
     networks:
       - backend
   
-  # nginx:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.nginx
-  #   container_name: nginx
-  #   restart: always
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - web
-  #   volumes:
-  #     - ./static:/app/static
-  #     - ./uploads:/app/uploads
-  #   networks:
-  #     - backend
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443" 
+    depends_on:
+      - web
+    volumes:
+      - ./static:/app/static
+      - ./uploads:/app/uploads
+      - ./nginx/conf.d:/etc/nginx/conf.d   # Nginx config-ləri mount etmək üçün (əlavə)
+      - ./nginx/ssl:/etc/nginx/ssl 
+    networks:
+      - backend
 
 networks:
   backend:
