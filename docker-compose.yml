@@ -14,8 +14,8 @@ services:
     volumes:
       - ./static:/code/bolbol/static
       - ./uploads:/code/bolbol/uploads
-    # ports:
-    #   - "80:8000"
+    ports:
+       - "80:8000"
     networks:
       - backend
     command: /bin/sh -c "python manage.py collectstatic --noinput && gunicorn bolbol.wsgi:application --bind 0.0.0.0:8000 --forwarded-allow-ips='*'"
@@ -65,7 +65,6 @@ services:
     container_name: nginx
     restart: always
     ports:
-      - "80:80"
       - "443:443" 
     depends_on:
       - web
