@@ -19,7 +19,7 @@ class CommentsByProductAPIView(APIView):
     http_method_names = ["get"]
 
     def get(self, request, product_slug, *args, **kwargs):
-        product = get_object_or_404(Product, slug=product_slug)
+        product = get_object_or_404(Product.objects.filter(is_active=True), slug=product_slug)
         comments = Comment.objects.filter(product=product)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
@@ -30,10 +30,12 @@ class CommentCreateAPIView(APIView):
     http_method_names = ["post"]
 
     def post(self, request, product_slug, *args, **kwargs):
-        product = get_object_or_404(Product, slug=product_slug)
+        author = request.user
+        product = get_object_or_404(Product.objects.filter(is_active=True), slug=product_slug)
         serializer = CommentCreateSerializer(
             data=request.data, context={
-            "author": request.user, "product": product
+            "author": author,
+            "product": product
         })
         if serializer.is_valid():
             serializer.save()

@@ -46,10 +46,10 @@ class Comment(models.Model):
         verbose_name_plural = "Comments"
         ordering = ("-posted_at",)
 
-    # def save(self, *args, **kwargs):
-    #     if self.author and not self.pk:
-    #         self.masked_author_name = self.author.get_masked_fullname()
-    #     return super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        if self.author and not self.pk:
+            self.masked_author_name = self.author.get_masked_fullname()
+        return super().save(*args, **kwargs)
 
     def get_masked_author_name(self) -> str:
         return self.author.get_masked_fullname() if self.author else "Anonymous"
