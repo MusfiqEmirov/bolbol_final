@@ -3,15 +3,15 @@ from django_elasticsearch_dsl.registries import registry
 from products.models import Product
 
 
-product_index = Index('products')  # Elasticsearch index adı
+product_index = Index('products')  
 
 @registry.register_document
 class ProductDocument(Document):
     name = fields.TextField(
         analyzer="standard",
         fields={
-            "raw": fields.KeywordField(),            # dəqiq uyğunluq üçün
-            "suggest": fields.CompletionField(),     # autocomplete üçün
+            "raw": fields.KeywordField(),            
+            "suggest": fields.CompletionField(),     
         }
     )
 
