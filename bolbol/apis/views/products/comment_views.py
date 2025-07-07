@@ -23,15 +23,15 @@ class CommentsByProductAPIView(APIView):
         comments = Comment.objects.filter(product=product)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
-    
 
+      
 class CommentCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ["post"]
 
     def post(self, request, product_slug, *args, **kwargs):
         product = get_object_or_404(Product, slug=product_slug)
-        serializer = CommentCreateSerializer(product, data=request.data)
+        serializer = CommentCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(data=request.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
