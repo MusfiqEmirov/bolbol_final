@@ -27,8 +27,9 @@ __all__ = (
 
 
 class MultiDeleteProductView(APIView):
+    http_method_names = ["delete"]
+    
     def delete(self, request):
-        
         choosen_products = request.data.get("choosen_products", [])
         if not choosen_products:
             return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
