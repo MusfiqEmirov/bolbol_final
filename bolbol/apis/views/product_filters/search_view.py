@@ -7,6 +7,7 @@ from elasticsearch_dsl import Q
 from products.documents import ProductDocument
 from utils.paginations import ProductPagination 
 
+
 __all__ = [
     "ProductSearchAPIView"
 ]
@@ -34,11 +35,12 @@ class ProductSearchAPIView(APIView):
             ),
         ])
 
-        search = ProductDocument.search().query(q)
-        response = search.execute()
-
-        results = [{"id": hit.id, "name": hit.name} for hit in response]
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(results, request, view=self)
-
-        return paginator.get_paginated_response(page or [])
+        try:
+            search = ProductDocument.search().query(q)
+            response = search.execute()
+            results = [{"id": hit.id, "name": hit.name} for hit in response]
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(results, request, view=self)
+            return paginator.get_paginated_response(page or [])
+        except Exception as e:
+            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
