@@ -22,13 +22,9 @@ class ProductSearchAPIView(APIView):
         if not query:
             return Response({"error": "Query param is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        search = ProductDocument.search().query("match", name=query)
+        search = ProductDocument.search().query("match", name=query).filter("term", is_active=True)
         response = search.execute()
         results = [{"id": hit.id, "name": hit.name} for hit in response]
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(results, request, view=self)
-
-        if not results:
-            return paginator.get_paginated_response([])
-
         return paginator.get_paginated_response(page)
