@@ -25,24 +25,16 @@ __all__ = (
 )
 
 
-class MultiDeleteProductView(APIView):
-    http_method_names = ["delete"]
-
+class BulkDeleteProductView(APIView):
     def delete(self, request):
-        try:
-            data = request.data
-            if not data:
-                data = json.loads(request.body.decode('utf-8'))
+       
+        ids = request.data.get("ids", [])
+        if not ids:
+            return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-            choosen_products = data.get("choosen_products", [])
-            if not choosen_products:
-                return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
-
-            deleted_count, _ = Product.objects.filter(id__in=choosen_products).delete()
-            return Response({"message": f"{deleted_count} product(s) deleted."}, status=status.HTTP_200_OK)
-        except json.JSONDecodeError:
-            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
-
+        # Sil
+        deleted_count, _ = Product.objects.filter(id__in=ids).delete()
+        return Response({"message": f"{deleted_count} product(s) deleted."}, status=status.HTTP_200_OK)
 
 
 class ProductCardListAPIView(APIView):
