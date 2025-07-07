@@ -31,8 +31,11 @@ class CommentCreateAPIView(APIView):
 
     def post(self, request, product_slug, *args, **kwargs):
         product = get_object_or_404(Product, slug=product_slug)
-        serializer = CommentCreateSerializer(data=request.data)
+        serializer = CommentCreateSerializer(
+            data=request.data, context={
+            "author": request.user, "product": product
+        })
         if serializer.is_valid():
-            serializer.save(author=request.user, product=product)
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
