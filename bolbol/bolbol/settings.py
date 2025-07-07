@@ -35,11 +35,25 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 DEBUG = True
 PROD = not DEBUG
 
+<<<<<<< HEAD
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "pi.backend.az",
     "localhost",
 ]
+=======
+if DEBUG:
+    ALLOWED_HOSTS = [
+        "127.0.0.1",
+        # "konum24.az",
+        # "www.konum24.az", 
+        # "138.68.109.44",
+        'pi.backend.az',
+        'localhost',
+        "web",
+        "*",
+    ]
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
 
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
 SECURE_SSL_REDIRECT = False
@@ -69,11 +83,19 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = False
 CSRF_TRUSTED_ORIGINS = [
     "https://pi.backend.az",
+<<<<<<< HEAD
     "http://localhost:8000",
     # "https://konum24.az",
     # "https://www.konum24.az",
     "https://bolbol-three.vercel.app",
     "http://bolbol-three.vercel.app",
+=======
+    "http://localhost:8000",  # Local development
+    "https://konum24.az",     # Production
+    "https://www.konum24.az",     # Production
+    'https://bolbol-three.vercel.app/',
+    'http://bolbol-three.vercel.app/',
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
 ]
 
 INSTALLED_APPS = [
@@ -104,6 +126,7 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -113,7 +136,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 ROOT_URLCONF = "bolbol.urls"
 
 TEMPLATES = [
@@ -278,6 +301,7 @@ ELASTICSEARCH_DSL = {
     },
 }
 
+<<<<<<< HEAD
 # Swagger configurations
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
@@ -290,3 +314,19 @@ SWAGGER_SETTINGS = {
     "USE_SESSION_AUTH": False,
     "DEFAULT_API_URL": "https://pi.backend.az/",
 }
+=======
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': None,
+    'DEFAULT_INFO': 'your_project.urls.api_info',
+    'VALIDATOR_URL': None,
+    'DEFAULT_MODEL_RENDERING': 'example',
+    'DOC_EXPANSION': 'none',
+    'PERSIST_AUTH': True,
+    'SCHEMA_URL': 'https://pi.backend.az/swagger/?format=openapi',  # ← buranı əlavə edə bilərsən
+}
+
+APPEND_SLASH = False
+SECURE_SSL_REDIRECT = True
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809

@@ -27,6 +27,9 @@ class ProductSearchAPIView(APIView):
 
         results = [{"id": hit.id, "name": hit.name} for hit in response]
 
+        if not results:
+            return paginator.get_paginated_response([])
+
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(results, request, view=self)
         return paginator.get_paginated_response(page)
