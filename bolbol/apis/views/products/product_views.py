@@ -27,14 +27,24 @@ __all__ = (
 
 class BulkDeleteProductView(APIView):
     def delete(self, request):
-       
         ids = request.data.get("ids", [])
         if not ids:
             return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Sil
-        deleted_count, _ = Product.objects.filter(id__in=ids).delete()
-        return Response({"message": f"{deleted_count} product(s) deleted."}, status=status.HTTP_200_OK)
+        existing_products = Product.objects.filter(id__in=ids)
+        deleted_ids = list(existing_products.values_list("id", flat=True))
+
+        if not deleted_ids:
+            return Response({
+                "error": "No products found for the given IDs."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        existing_products.delete()
+
+        return Response({
+            "message": f"{len(deleted_ids)} product(s) deleted.",
+            "deleted_ids": deleted_ids
+        }, status=status.HTTP_200_OK)
 
 
 class ProductCardListAPIView(APIView):
