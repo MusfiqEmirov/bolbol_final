@@ -120,8 +120,13 @@ urlpatterns = [
 
     # Comments endpoint
     path(
-        "comments/", 
-        CommentAPIView.as_view(), 
+        "products/<slug:product_slug>/comments/", 
+        CommentsByProductAPIView.as_view(), 
+        name="product-comments"
+    ),
+    path(
+        "products/<slug:product_slug>/comments/create/", 
+        CommentCreateAPIView.as_view(), 
         name="comment-create"
     ),
 
