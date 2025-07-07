@@ -22,4 +22,4 @@ class CommentCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         author = self.context['author']  
         product = self.context['product']  
-        return Comment.objects.create(author=author, product=product, **validated_data)
+        return Comment.objects.create(author=author, product=product, text=validated_data['text'])
