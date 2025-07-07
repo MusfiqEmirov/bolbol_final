@@ -23,8 +23,8 @@ class CommentsByProductAPIView(APIView):
         comments = Comment.objects.filter(product=product)
         serializer = CommentSerializer(comments,many=True)
         return Response(serializer.data)
-    
 
+      
 class CommentCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ["post"]
