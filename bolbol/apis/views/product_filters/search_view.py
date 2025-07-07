@@ -22,25 +22,32 @@ class ProductSearchAPIView(APIView):
         if not query:
             return Response({"error": "Query param is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        q = Q("bool", must=[
-            Q("term", is_active=True),
-            Q(
-                "bool",
-                should=[
-                    Q("match", name={"query": query, "fuzziness": "auto"}),
-                    Q("prefix", name=query),
-                    Q("match_phrase_prefix", name=query),
-                ],
-                minimum_should_match=1,
-            ),
-        ])
+        paginator = self.pagination_class()
 
         try:
+            q = Q(
+                "bool",
+                must=[
+                    Q("term", is_active=True),
+                    Q(
+                        "bool",
+                        should=[
+                            Q("match", name={"query": query, "fuzziness": "auto"}),
+                            Q("prefix", name=query),
+                            Q("match_phrase_prefix", name=query),
+                        ],
+                        minimum_should_match=1,
+                    ),
+                ],
+            )
+
             search = ProductDocument.search().query(q)
             response = search.execute()
+
             results = [{"id": hit.id, "name": hit.name} for hit in response]
-            paginator = self.pagination_class()
-            page = paginator.paginate_queryset(results, request, view=self)
-            return paginator.get_paginated_response(page or [])
+
         except Exception as e:
-            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": f"Elasticsearch error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        page = paginator.paginate_queryset(results, request, view=self)
+        return paginator.get_paginated_response(page if page is not None else [])
