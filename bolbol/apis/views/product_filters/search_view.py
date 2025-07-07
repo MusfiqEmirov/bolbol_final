@@ -24,12 +24,11 @@ class ProductSearchAPIView(APIView):
 
         search = ProductDocument.search().query("match", name=query)
         response = search.execute()
-
         results = [{"id": hit.id, "name": hit.name} for hit in response]
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(results, request, view=self)
 
         if not results:
             return paginator.get_paginated_response([])
 
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(results, request, view=self)
         return paginator.get_paginated_response(page)

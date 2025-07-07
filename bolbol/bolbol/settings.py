@@ -35,6 +35,13 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 DEBUG = True
 PROD = not DEBUG
 
+<<<<<<< HEAD
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "pi.backend.az",
+    "localhost",
+]
+=======
 if DEBUG:
     ALLOWED_HOSTS = [
         "127.0.0.1",
@@ -46,11 +53,22 @@ if DEBUG:
         "web",
         "*",
     ]
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
 
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-CORS_ALLOW_CREDENTIALS = True  # Allow cookies & authorization headers
+# Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
+SECURE_SSL_REDIRECT = False
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# CORS settings
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
-# CORS_ALLOW_HEADERS = ["*"]
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
@@ -62,26 +80,23 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
-CORS_ALLOW_ALL_ORIGINS = True  
+CORS_ALLOW_ALL_ORIGINS = False
 CSRF_TRUSTED_ORIGINS = [
     "https://pi.backend.az",
+<<<<<<< HEAD
+    "http://localhost:8000",
+    # "https://konum24.az",
+    # "https://www.konum24.az",
+    "https://bolbol-three.vercel.app",
+    "http://bolbol-three.vercel.app",
+=======
     "http://localhost:8000",  # Local development
     "https://konum24.az",     # Production
     "https://www.konum24.az",     # Production
     'https://bolbol-three.vercel.app/',
     'http://bolbol-three.vercel.app/',
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
 ]
-
-# CSRF_TRUSTED_ORIGINS = ["http://*", "https://*"]
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-
-# Application definition
 
 INSTALLED_APPS = [
     "corsheaders",  # Add this at the top of third-party apps
@@ -286,6 +301,20 @@ ELASTICSEARCH_DSL = {
     },
 }
 
+<<<<<<< HEAD
+# Swagger configurations
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "bolbol": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+        }
+    },
+    "USE_SESSION_AUTH": False,
+    "DEFAULT_API_URL": "https://pi.backend.az/",
+}
+=======
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
@@ -300,3 +329,4 @@ SWAGGER_SETTINGS = {
 
 APPEND_SLASH = False
 SECURE_SSL_REDIRECT = True
+>>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
