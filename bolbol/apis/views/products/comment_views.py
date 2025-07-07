@@ -30,10 +30,12 @@ class CommentCreateAPIView(APIView):
     http_method_names = ["post"]
 
     def post(self, request, product_slug, *args, **kwargs):
+        author = request.user
         product = get_object_or_404(Product.objects.filter(is_active=True), slug=product_slug)
         serializer = CommentCreateSerializer(
             data=request.data, context={
-            "author": request.user, "product": product
+            "author": author,
+            "product": product
         })
         if serializer.is_valid():
             serializer.save()
