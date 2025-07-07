@@ -21,7 +21,20 @@ __all__ = (
     "ProductDetailAPIView",
     "ProductCreateAPIView",
     "SimilarProductListAPIView",
+    "MultiDeleteProductView",
 )
+
+
+
+class MultiDeleteProductView(APIView):
+    def delete(self, request):
+        
+        choosen_products = request.data.get("choosen_products", [])
+        if not choosen_products:
+            return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted_count, _ = Product.objects.filter(id__in=choosen_products).delete()
+        return Response({"message": f"{deleted_count} product(s) deleted."}, status=status.HTTP_200_OK)
 
 
 class ProductCardListAPIView(APIView):

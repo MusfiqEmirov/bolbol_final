@@ -23,7 +23,6 @@ class CommentsByProductAPIView(APIView):
             comments = Comment.objects.filter(product=product)
             serializer = CommentSerializer(comments,many=True)
             return Response(serializer.data)
-
         except Exception as e:
             return Response({"error": str(e)}, status=400)
 

@@ -7,6 +7,11 @@ app_name = "apis"
 urlpatterns = [
     # Product endpoints
     path(
+        'products/delete-multiple/',
+        MultiDeleteProductView.as_view(), 
+        name='bulk-delete-products'
+    ),
+    path(
         "search/",
         ProductSearchAPIView.as_view(),
         name="product-search"
