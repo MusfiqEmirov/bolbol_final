@@ -18,7 +18,7 @@ class TransportProductFilterAPIView(APIView):
     CATEGORY_NAME = "Transport"
 
     def post(self, request, *args, **kwargs):
-        queryset = Product.objects.filter(is_active=True, category__super_category__name=self.CATEGORY_NAME)
+        queryset = Product.objects.filter(is_active=True, category__parent_category__name=self.CATEGORY_NAME)
         filters = request.data
 
         price_min = filters.get("price_min")
