@@ -33,7 +33,8 @@ class CommentCreateAPIView(APIView):
         product = get_object_or_404(Product.objects.filter(is_active=True), slug=product_slug)
         serializer = CommentCreateSerializer(
             data=request.data, context={
-            "author": request.user, "product": product
+            "request": request,
+            "product": product
         })
         if serializer.is_valid():
             serializer.save()
