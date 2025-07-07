@@ -29,19 +29,30 @@ class MultiDeleteProductView(APIView):
     http_method_names = ["delete"]
 
     def delete(self, request):
-        try:
-            data = request.data
-            if not data:
-                data = json.loads(request.body.decode('utf-8'))
+        choosen_products = request.data.get("choosen_products", [])
+        if not choosen_products:
+            return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-            choosen_products = data.get("choosen_products", [])
-            if not choosen_products:
-                return Response({"error": "No product IDs provided."}, status=status.HTTP_400_BAD_REQUEST)
+        # Mövcud məhsulları çəkirik
+        existing_products = Product.objects.filter(id__in=choosen_products)
+        existing_ids = list(existing_products.values_list("id", flat=True))
+        not_found_ids = list(set(choosen_products) - set(existing_ids))
 
-            deleted_count, _ = Product.objects.filter(id__in=choosen_products).delete()
-            return Response({"message": f"{deleted_count} product(s) deleted."}, status=status.HTTP_200_OK)
-        except json.JSONDecodeError:
-            return Response({"error": "Invalid JSON"}, status=status.HTTP_400_BAD_REQUEST)
+        # Əgər heç bir məhsul tapılmayıbsa
+        if not existing_ids:
+            return Response({
+                "error": "No products found for the given IDs.",
+                "not_found_ids": not_found_ids
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Tapılanları silirik
+        deleted_count, _ = existing_products.delete()
+
+        return Response({
+            "message": f"{deleted_count} product(s) deleted.",
+            "deleted_ids": existing_ids,
+            "not_found_ids": not_found_ids
+        }, status=status.HTTP_200_OK)
 
 
 
