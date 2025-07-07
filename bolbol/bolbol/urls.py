@@ -39,6 +39,7 @@ schema_view = get_schema_view(
         description="Comprehensive API documentation covering all available endpoints.",
     ),
     public=True,
+    url='https://pi.backend.az/',  # ← Burada HTTPS göstər
 )
 
 urlpatterns += [
