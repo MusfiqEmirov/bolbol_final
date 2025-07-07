@@ -50,11 +50,7 @@ schema_view = get_schema_view(
         license=openapi.License(name="BSD License"),
     ),
     public=True,
-<<<<<<< HEAD
-    permission_classes=(permissions.AllowAny,),
-=======
-    url='https://pi.backend.az/',  # ← Burada HTTPS göstər
->>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
+    url='https://pi.backend.az/',  
 )
 
 urlpatterns += [
