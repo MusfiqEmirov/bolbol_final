@@ -15,14 +15,12 @@ __all__ = [
 class ProductSearchAPIView(APIView):
     permission_classes = [AllowAny]
     http_method_names = ["get"]
-    pagination_class = ProductPagination
 
     def get(self, request):
         query = request.GET.get("query", "").strip()
+
         if not query:
             return Response({"error": "Query param is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        paginator = self.pagination_class()
 
         try:
             q = Q(
@@ -43,11 +41,12 @@ class ProductSearchAPIView(APIView):
 
             search = ProductDocument.search().query(q)
             response = search.execute()
-
             results = [{"id": hit.id, "name": hit.name} for hit in response]
 
-        except Exception as e:
-            return Response({"error": f"Elasticsearch error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(results, status=status.HTTP_200_OK)
 
-        page = paginator.paginate_queryset(results, request, view=self)
-        return paginator.get_paginated_response(page if page is not None else [])
+        except Exception as e:
+            return Response(
+                {"error": f"Elasticsearch error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
