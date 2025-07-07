@@ -23,22 +23,11 @@ class ProductSearchAPIView(APIView):
             return Response({"error": "Query param is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            q = Q(
-                "bool",
-                must=[
-                    Q("term", is_active=True),
-                    Q(
-                        "bool",
-                        should=[
-                            Q("match", name={"query": query, "fuzziness": "auto"}),
-                            Q("prefix", name=query),
-                            Q("match_phrase_prefix", name=query),
-                        ],
-                        minimum_should_match=1,
-                    ),
-                ],
+            q = Q("term", is_active=True) & (
+                Q("match", name={"query": query, "fuzziness": "auto"}) |
+                Q("prefix", name=query) |
+                Q("match_phrase_prefix", name=query)
             )
-
             search = ProductDocument.search().query(q)
             response = search.execute()
             results = [{"id": hit.id, "name": hit.name} for hit in response]
