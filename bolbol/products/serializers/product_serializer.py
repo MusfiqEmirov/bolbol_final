@@ -112,24 +112,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "characteristics"
         ]
         
-        
-class ProductDeleteSerializer(serializers.Serializer):
+class BulkDeleteProductSerializer(serializers.Serializer):
     ids = serializers.ListField(
         child=serializers.IntegerField(),
-        required=True,
         allow_empty=False,
         help_text="List of product IDs to delete."
     )
-
-    def validate_ids(self, value):
-        """
-        Gələn ID-lərin mövcud məhsullara uyğun olub olmadığını yoxlayır.
-        Bütün məhsullar (is_active=True və ya False) nəzərə alınır.
-        """
-        existing_ids = set(
-            Product._base_manager.filter(id__in=value).values_list('id', flat=True)
-        )
-        invalid_ids = [id for id in value if id not in existing_ids]
-        if invalid_ids:
-            raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
-        return value
