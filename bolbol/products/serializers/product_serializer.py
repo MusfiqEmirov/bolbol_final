@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from drf_yasg.utils import swagger_serializer_method
+
 
 from products.models import Product, ProductPhoto
 from users.serializers import ProductOwnerMiniProfileSerializer, UserSerializer
@@ -109,15 +111,16 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         ]
         
         
+
 class ProductDeleteSerializer(serializers.Serializer):
     ids = serializers.ListField(
         child=serializers.IntegerField(),
         required=True,
-        allow_empty=False
+        allow_empty=False,
+        help_text="List of product IDs to delete."
     )
 
     def validate_ids(self, value):
-        # ID-lərin mövcud olduğunu yoxlayırıq
         existing_ids = set(Product.objects.filter(id__in=value).values_list('id', flat=True))
         invalid_ids = [id for id in value if id not in existing_ids]
         if invalid_ids:
