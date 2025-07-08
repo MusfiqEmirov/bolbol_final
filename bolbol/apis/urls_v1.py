@@ -9,7 +9,7 @@ urlpatterns = [
     # Product endpoints
     path(
         'products/delete-multiple/',
-        delete_multiple_products, 
+        BulkDeleteProductsAPIView.as_view(), 
         name='bulk-delete-products'
     ),
     path(
