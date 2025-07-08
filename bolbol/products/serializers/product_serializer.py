@@ -112,9 +112,10 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "characteristics"
         ]
         
-class BulkDeleteProductSerializer(serializers.Serializer):
+
+class ProductDeleteMultipleSerializer(serializers.Serializer):
     ids = serializers.ListField(
-        child=serializers.IntegerField(),
+        child=serializers.IntegerField(), 
         allow_empty=False,
-        help_text="List of product IDs to delete."
+        help_text="List of product IDs to delete"
     )
