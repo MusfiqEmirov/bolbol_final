@@ -107,3 +107,19 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
             "characteristics"
         ]
+        
+        
+class ProductDeleteSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=True,
+        allow_empty=False
+    )
+
+    def validate_ids(self, value):
+        # ID-lərin mövcud olduğunu yoxlayırıq
+        existing_ids = set(Product.objects.filter(id__in=value).values_list('id', flat=True))
+        invalid_ids = [id for id in value if id not in existing_ids]
+        if invalid_ids:
+            raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
+        return value

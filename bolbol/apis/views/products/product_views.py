@@ -6,7 +6,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from django.db.models import F
+from django.db import transaction
+from django.core.exceptions import ValidationError
 
+from products.serializers.product_serializer import ProductDeleteSerializer
 from products.models import Product
 from products.serializers import (
     ProductCardSerializer, 
@@ -26,29 +29,46 @@ __all__ = (
 
 
 class BulkDeleteProductView(APIView):
-    def delete(self, request):
-        ids = request.data.get("ids", [])
-        if not ids:
-            return Response(
-                {"error": "No product IDs provided."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
-        existing_products = Product.objects.filter(id__in=ids, is_active=True)
-        deleted_ids = list(existing_products.values_list("id", flat=True))
+    def delete(self, request, *args, **kwargs):
+        serializer = ProductDeleteSerializer(data=request.data)
+        if serializer.is_valid():
+            ids = serializer.validated_data['ids']
+            
+            # Məhsulları tap və sahibini yoxla
+            products_to_delete = Product.objects.filter(id__in=ids)
+            found_ids = list(products_to_delete.values_list('id', flat=True))
+            not_found_ids = list(set(ids) - set(found_ids))
 
-        if not deleted_ids:
-            return Response({
-                "error": "No active products found for the given IDs."
-            }, status=status.HTTP_404_NOT_FOUND)
+            # Sahiblik və ya admin statusunu yoxla
+            for product in products_to_delete:
+                if not self.check_object_permissions(request, product):
+                    return Response(
+                        {"error": f"You do not have permission to delete product ID {product.id}"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
-        existing_products.delete()
-
-        return Response({
-            "message": f"{len(deleted_ids)} product(s) deleted.",
-            "deleted_ids": deleted_ids
-        }, status=status.HTTP_200_OK)
-
+            try:
+                with transaction.atomic():
+                    deleted_count, _ = products_to_delete.delete()
+                    if deleted_count != len(found_ids):
+                        raise ValidationError("Some products could not be deleted.")
+                
+                return Response(
+                    {
+                        "message": f"{deleted_count} product(s) deleted successfully.",
+                        "deleted_ids": found_ids,
+                        "not_found_ids": not_found_ids
+                    },
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to delete products: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class ProductCardListAPIView(APIView):
     """Endpoint to list products with essential fields."""
