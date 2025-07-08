@@ -10,6 +10,8 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.db.models import Q
+
 
 from products.serializers.product_serializer import ProductDeleteSerializer
 from products.models import Product
@@ -30,21 +32,20 @@ __all__ = (
 )
 
 class BulkDeleteProductView(APIView):
-    """
-    Silmək üçün məhsul ID-ləri göndərilir. Admin istənilən məhsulu silə bilər.
-    İstifadəçi yalnız öz məhsullarını silə bilər. is_active statusundan asılı olmayaraq silmək mümkündür.
-    """
-
     def delete(self, request, *args, **kwargs):
         serializer = ProductDeleteSerializer(data=request.data)
         if serializer.is_valid():
             ids = serializer.validated_data['ids']
 
-            # Admins all products, others only owned
+            # is_active=True OR is_active=False şərti ilə məhsulları tap
             if request.user.is_staff:
-                products_to_delete = Product._base_manager.filter(id__in=ids)
+                products_to_delete = Product._base_manager.filter(
+                    Q(id__in=ids) & (Q(is_active=True) | Q(is_active=False))
+                )
             else:
-                products_to_delete = Product._base_manager.filter(id__in=ids, owner=request.user)
+                products_to_delete = Product._base_manager.filter(
+                    Q(id__in=ids) & Q(owner=request.user) & (Q(is_active=True) | Q(is_active=False))
+                )
 
             found_ids = list(products_to_delete.values_list('id', flat=True))
             not_found_ids = list(set(ids) - set(found_ids))
@@ -57,14 +58,6 @@ class BulkDeleteProductView(APIView):
                     },
                     status=status.HTTP_200_OK
                 )
-
-            # (Optional) Permission check — fərdi məhsul üzərində
-            for product in products_to_delete:
-                if not self.check_object_permissions(request, product):
-                    return Response(
-                        {"error": f"You do not have permission to delete product ID {product.id}"},
-                        status=status.HTTP_403_FORBIDDEN
-                    )
 
             try:
                 with transaction.atomic():
@@ -85,7 +78,6 @@ class BulkDeleteProductView(APIView):
                     {"error": f"Failed to delete products: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
