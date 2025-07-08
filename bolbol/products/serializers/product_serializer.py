@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from drf_yasg.utils import swagger_serializer_method
+from django.db.models import Q
+
 
 
 from products.models import Product, ProductPhoto
@@ -111,7 +113,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         ]
         
         
-        
 class ProductDeleteSerializer(serializers.Serializer):
     ids = serializers.ListField(
         child=serializers.IntegerField(),
@@ -123,9 +124,14 @@ class ProductDeleteSerializer(serializers.Serializer):
     def validate_ids(self, value):
         """
         Gələn ID-lərin mövcud məhsullara uyğun olub olmadığını yoxlayır.
-        Bütün məhsullar (is_active = True və False) nəzərə alınır.
+        Bütün məhsullar (is_active = True və ya False) nəzərə alınır.
         """
-        existing_ids = set(Product._base_manager.filter(id__in=value).values_list('id', flat=True))
+        # OR şəklində is_active true və ya false olan məhsulların çəkilməsi
+        existing_ids = set(
+            Product._base_manager.filter(
+                Q(id__in=value) & (Q(is_active=True) | Q(is_active=False))
+            ).values_list('id', flat=True)
+        )
         invalid_ids = [id for id in value if id not in existing_ids]
         if invalid_ids:
             raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
