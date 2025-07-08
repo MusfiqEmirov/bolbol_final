@@ -58,8 +58,5 @@ django-elasticsearch-dsl
 elasticsearch
 elasticsearch-dsl
 gunicorn
-<<<<<<< HEAD
 django-cors-headers
-=======
 whitenoise
->>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
