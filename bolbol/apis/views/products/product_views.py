@@ -7,9 +7,17 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.db.models import F
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.db.models import Q
+
 
 from products.models import Product, ProductPhoto
 from products.serializers import ProductCreateSerializer
+from products.serializers.product_serializer import ProductDeleteSerializer
+
 from products.models import Product
 from products.serializers import (
     ProductCardSerializer, 
@@ -24,34 +32,45 @@ __all__ = (
     "ProductDetailAPIView",
     "ProductCreateAPIView",
     "SimilarProductListAPIView",
-    "BulkDeleteProductView",
+    "BulkDeleteProductsAPIView",
 )
 
 
-class BulkDeleteProductView(APIView):
+class BulkDeleteProductsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
     def delete(self, request):
-        ids = request.data.get("ids", [])
-        if not ids:
+        serializer = ProductDeleteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
+
+        # Əgər admindirsə, bütün məhsulları tap (status və is_active yoxlanmır)
+        if request.user.is_staff:
+            products = Product.objects.filter(id__in=ids)
+        else:
+            # İstifadəçi yalnız öz məhsullarını tapa bilər
+            products = Product.objects.filter(id__in=ids, owner=request.user)
+
+        found_ids = list(products.values_list('id', flat=True))
+        not_found_ids = list(set(ids) - set(found_ids))
+
+        if not found_ids:
             return Response(
-                {"error": "No product IDs provided."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "No products found for the given IDs.", "not_found_ids": not_found_ids},
+                status=status.HTTP_404_NOT_FOUND
             )
 
-        existing_products = Product.objects.filter(id__in=ids, is_active=True)
-        deleted_ids = list(existing_products.values_list("id", flat=True))
-
-        if not deleted_ids:
-            return Response({
-                "error": "No active products found for the given IDs."
-            }, status=status.HTTP_404_NOT_FOUND)
-
-        existing_products.delete()
+        try:
+            with transaction.atomic():
+                deleted_count, _ = products.delete()
+        except Exception as e:
+            return Response({"error": f"Deletion failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({
-            "message": f"{len(deleted_ids)} product(s) deleted.",
-            "deleted_ids": deleted_ids
+            "message": f"{deleted_count} product(s) deleted successfully.",
+            "deleted_ids": found_ids,
+            "not_found_ids": not_found_ids
         }, status=status.HTTP_200_OK)
-
+    
 
 class ProductCardListAPIView(APIView):
     """Endpoint to list products with essential fields."""
