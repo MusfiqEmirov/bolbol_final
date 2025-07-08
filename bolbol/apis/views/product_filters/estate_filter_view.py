@@ -15,7 +15,7 @@ class RealEstateProductFilterAPIView(APIView):
     CATEGORY_NAME = "Real Estate"
 
     def post(self, request, *args, **kwargs):
-        queryset = Product.objects.filter(is_active=True, category__super_category__name=self.CATEGORY_NAME)
+        queryset = Product.objects.filter(is_active=True, category__parent_category__name=self.CATEGORY_NAME)
 
         filters = request.data
 
