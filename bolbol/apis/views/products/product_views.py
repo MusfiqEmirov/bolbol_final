@@ -31,20 +31,23 @@ __all__ = (
     "BulkDeleteProductView",
 )
 
+
 class BulkDeleteProductView(APIView):
+
     def delete(self, request, *args, **kwargs):
         serializer = ProductDeleteSerializer(data=request.data)
         if serializer.is_valid():
             ids = serializer.validated_data['ids']
 
-            # is_active=True OR is_active=False şərti ilə məhsulları tap
+            # Adminlər və adi istifadəçilər üçün is_active filtrini tətbiq etmirik
             if request.user.is_staff:
-                products_to_delete = Product._base_manager.filter(
+                products_to_delete = Product.objects.filter(
                     Q(id__in=ids) & (Q(is_active=True) | Q(is_active=False))
                 )
             else:
-                products_to_delete = Product._base_manager.filter(
-                    Q(id__in=ids) & Q(owner=request.user) & (Q(is_active=True) | Q(is_active=False))
+                # Adi istifadəçilər yalnız öz məhsullarını silə bilər
+                products_to_delete = Product.objects.filter(
+                    Q(id__in=ids) & (Q(is_active=True) | Q(is_active=False)) & Q(owner=request.user)
                 )
 
             found_ids = list(products_to_delete.values_list('id', flat=True))
@@ -53,11 +56,19 @@ class BulkDeleteProductView(APIView):
             if not found_ids:
                 return Response(
                     {
-                        "message": "No products found for the given IDs.",
+                        "error": "No products found for the given IDs.",
                         "not_found_ids": not_found_ids
                     },
-                    status=status.HTTP_200_OK
+                    status=status.HTTP_404_NOT_FOUND
                 )
+
+            # Sahiblik və ya admin statusunu yoxla
+            for product in products_to_delete:
+                if not self.check_object_permissions(request, product):
+                    return Response(
+                        {"error": f"You do not have permission to delete product ID {product.id}"},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
             try:
                 with transaction.atomic():
