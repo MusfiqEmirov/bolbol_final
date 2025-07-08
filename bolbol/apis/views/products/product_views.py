@@ -39,10 +39,10 @@ class BulkDeleteProductView(APIView):
             
             # Adminlər və adi istifadəçilər üçün is_active filtrini tətbiq etmirik
             if request.user.is_staff:
-                products_to_delete = Product.objects.filter(id__in=ids)
+                products_to_delete = Product.objects.all().filter(id__in=ids)
             else:
                 # Adi istifadəçilər yalnız öz məhsullarını silə bilər
-                products_to_delete = Product.objects.filter(id__in=ids, owner=request.user)
+                products_to_delete = Product.objects.all().filter(id__in=ids, owner=request.user)
 
             found_ids = list(products_to_delete.values_list('id', flat=True))
             not_found_ids = list(set(ids) - set(found_ids))
