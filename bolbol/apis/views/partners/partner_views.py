@@ -10,11 +10,11 @@ __all__ = ("PartnerCompanyListAPIView",)
 
 
 class PartnerCompanyListAPIView(APIView):
+    permission_classes = [AllowAny]
     http_method_names = ["get"]
 
     def get(self, request):
         partner_companies = PartnerCompany.objects.filter(is_active=True)
         serializer = PartnerCompanySerializer(partner_companies, many=True)
-        serializer = None
         return Response(serializer.data, status=status.HTTP_200_OK)
 

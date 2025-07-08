@@ -6,7 +6,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from django.db.models import F
+from django.db import transaction
+from django.core.exceptions import ValidationError
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.db.models import Q
 
+
+from products.serializers.product_serializer import ProductDeleteMultipleSerializer
 from products.models import Product
 from products.serializers import (
     ProductCardSerializer, 
@@ -21,34 +28,38 @@ __all__ = (
     "ProductDetailAPIView",
     "ProductCreateAPIView",
     "SimilarProductListAPIView",
-    "BulkDeleteProductView",
+    # "BulkDeleteProductsAPIView",
+    "delete_multiple_products"
 )
 
 
-class BulkDeleteProductView(APIView):
-    def delete(self, request):
-        ids = request.data.get("ids", [])
-        if not ids:
-            return Response(
-                {"error": "No product IDs provided."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+# products/views.py
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
-        existing_products = Product.objects.filter(id__in=ids, is_active=True)
-        deleted_ids = list(existing_products.values_list("id", flat=True))
 
-        if not deleted_ids:
-            return Response({
-                "error": "No active products found for the given IDs."
-            }, status=status.HTTP_404_NOT_FOUND)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def delete_multiple_products(request):
+    serializer = ProductDeleteMultipleSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    
+    ids_to_delete = serializer.validated_data['ids']
+    
+    # İstifadəçi yalnız öz məhsullarını silə bilər, yoxsa ümumi silməyə icazə varsa dəyişə bilərsən
+    products = Product.objects.filter(id__in=ids_to_delete, owner=request.user)
+    
+    deleted_count = products.count()
+    products.delete()
+    
+    return Response(
+        {"deleted_count": deleted_count, "deleted_ids": ids_to_delete},
+        status=status.HTTP_200_OK
+    )
 
-        existing_products.delete()
-
-        return Response({
-            "message": f"{len(deleted_ids)} product(s) deleted.",
-            "deleted_ids": deleted_ids
-        }, status=status.HTTP_200_OK)
-
+    
 
 class ProductCardListAPIView(APIView):
     """Endpoint to list products with essential fields."""

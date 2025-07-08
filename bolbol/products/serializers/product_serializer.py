@@ -1,4 +1,8 @@
 from rest_framework import serializers
+from drf_yasg.utils import swagger_serializer_method
+from django.db.models import Q
+
+
 
 from products.models import Product, ProductPhoto
 from users.serializers import ProductOwnerMiniProfileSerializer, UserSerializer
@@ -107,3 +111,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
             "characteristics"
         ]
+        
+
+class ProductDeleteMultipleSerializer(serializers.Serializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(), 
+        allow_empty=False,
+        help_text="List of product IDs to delete"
+    )

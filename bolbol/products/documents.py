@@ -2,10 +2,19 @@ from django_elasticsearch_dsl import Document, Index, fields
 from django_elasticsearch_dsl.registries import registry
 from products.models import Product
 
-product_index = Index('products')  # Elasticsearch index adı
+
+product_index = Index('products')  
 
 @registry.register_document
 class ProductDocument(Document):
+    name = fields.TextField(
+        analyzer="standard",
+        fields={
+            "raw": fields.KeywordField(),            
+            "suggest": fields.CompletionField(),     
+        }
+    )
+
     class Index:
         name = 'products'
         settings = {
@@ -17,7 +26,6 @@ class ProductDocument(Document):
         model = Product
         fields = [
             'id',
-            'name',
             'description',
             'price',
             'is_active',

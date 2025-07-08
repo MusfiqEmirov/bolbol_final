@@ -2,34 +2,40 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from elasticsearch_dsl import Q
 
 from products.documents import ProductDocument
 from utils.paginations import ProductPagination 
+
 
 __all__ = [
     "ProductSearchAPIView"
 ]
 
 class ProductSearchAPIView(APIView):
-    """Search products using Elasticsearch and return paginated results."""
-
     permission_classes = [AllowAny]
     http_method_names = ["get"]
-    pagination_class = ProductPagination
 
     def get(self, request):
         query = request.GET.get("query", "").strip()
+
         if not query:
             return Response({"error": "Query param is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        search = ProductDocument.search().query("match", name=query)
-        response = search.execute()
+        try:
+            q = Q("term", is_active=True) & (
+                Q("match", name={"query": query, "fuzziness": "auto"}) |
+                Q("prefix", name=query) |
+                Q("match_phrase_prefix", name=query)
+            )
+            search = ProductDocument.search().query(q)
+            response = search.execute()
+            results = [{"id": hit.id, "name": hit.name} for hit in response]
 
-        results = [{"id": hit.id, "name": hit.name} for hit in response]
+            return Response(results, status=status.HTTP_200_OK)
 
-        if not results:
-            return paginator.get_paginated_response([])
-
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(results, request, view=self)
-        return paginator.get_paginated_response(page)
+        except Exception as e:
+            return Response(
+                {"error": f"Elasticsearch error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

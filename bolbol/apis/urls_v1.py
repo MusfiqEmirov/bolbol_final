@@ -2,13 +2,14 @@ from django.urls import path
 from .views import *
 
 
+
 app_name = "apis"
 
 urlpatterns = [
     # Product endpoints
     path(
         'products/delete-multiple/',
-        BulkDeleteProductView.as_view(), 
+        delete_multiple_products, 
         name='bulk-delete-products'
     ),
     path(
