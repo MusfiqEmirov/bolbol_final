@@ -8,6 +8,8 @@ from rest_framework import status
 from django.db.models import F
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from products.serializers.product_serializer import ProductDeleteSerializer
 from products.models import Product
@@ -29,7 +31,27 @@ __all__ = (
 
 
 class BulkDeleteProductView(APIView):
-
+    
+    @swagger_auto_schema(
+        operation_summary="Seçilmiş məhsulları sil",
+        operation_description="Verilən ID-lərə uyğun məhsulları silir. İstifadəçi yalnız ona məxsus olan məhsulları (və ya admin hüquqları varsa istənilən məhsulu) silə bilər.",
+        request_body=ProductDeleteSerializer,
+        responses={
+            204: openapi.Response(
+                description="Məhsullar uğurla silindi",
+                examples={
+                    "application/json": {
+                        "message": "3 product(s) deleted successfully.",
+                        "deleted_ids": [1, 2, 3],
+                        "not_found_ids": []
+                    }
+                }
+            ),
+            400: "Xəta: Yanlış sorğu məlumatları",
+            403: "İcazə yoxdur",
+            500: "Server xətası"
+        }
+    )
     def delete(self, request, *args, **kwargs):
         serializer = ProductDeleteSerializer(data=request.data)
         if serializer.is_valid():
