@@ -39,10 +39,11 @@ class BulkDeleteProductsAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']
 
-        # Adminlər istənilən məhsulu silə bilir, adi istifadəçi yalnız özünü
+        # Əgər admindirsə, bütün məhsulları tap (status və is_active yoxlanmır)
         if request.user.is_staff:
             products = Product.objects.filter(id__in=ids)
         else:
+            # İstifadəçi yalnız öz məhsullarını tapa bilər
             products = Product.objects.filter(id__in=ids, owner=request.user)
 
         found_ids = list(products.values_list('id', flat=True))
