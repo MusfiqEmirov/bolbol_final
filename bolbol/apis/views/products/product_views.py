@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.db.models import F
 from django.db import transaction
@@ -13,7 +14,10 @@ from drf_yasg import openapi
 from django.db.models import Q
 
 
+from products.models import Product, ProductPhoto
+from products.serializers import ProductCreateSerializer
 from products.serializers.product_serializer import ProductDeleteSerializer
+
 from products.models import Product
 from products.serializers import (
     ProductCardSerializer, 
@@ -133,10 +137,6 @@ class SimilarProductListAPIView(APIView):
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-from rest_framework.parsers import MultiPartParser, FormParser
-from products.models import Product, ProductPhoto
-from products.serializers import ProductCreateSerializer
-
 
 # class ProductCreateAPIView(APIView):
 #     """
@@ -179,13 +179,6 @@ from products.serializers import ProductCreateSerializer
         
 #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-import json
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.views import APIView
 
 class ProductCreateAPIView(APIView):
     """
