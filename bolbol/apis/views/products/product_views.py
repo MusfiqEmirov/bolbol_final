@@ -29,25 +29,26 @@ __all__ = (
     "BulkDeleteProductView",
 )
 
-
 class BulkDeleteProductView(APIView):
-  
+    """
+    Silmək üçün məhsul ID-ləri göndərilir. Admin istənilən məhsulu silə bilər.
+    İstifadəçi yalnız öz məhsullarını silə bilər. is_active statusundan asılı olmayaraq silmək mümkündür.
+    """
+
     def delete(self, request, *args, **kwargs):
         serializer = ProductDeleteSerializer(data=request.data)
         if serializer.is_valid():
             ids = serializer.validated_data['ids']
-            
-            # Adminlər və adi istifadəçilər üçün is_active filtrini tətbiq etmirik
+
+            # Admins all products, others only owned
             if request.user.is_staff:
-                products_to_delete = Product.objects.all().filter(id__in=ids)
+                products_to_delete = Product._base_manager.filter(id__in=ids)
             else:
-                # Adi istifadəçilər yalnız öz məhsullarını silə bilər
-                products_to_delete = Product.objects.all().filter(id__in=ids, owner=request.user)
+                products_to_delete = Product._base_manager.filter(id__in=ids, owner=request.user)
 
             found_ids = list(products_to_delete.values_list('id', flat=True))
             not_found_ids = list(set(ids) - set(found_ids))
 
-            # Əgər heç bir məhsul tapılmayıbsa
             if not found_ids:
                 return Response(
                     {
@@ -57,7 +58,7 @@ class BulkDeleteProductView(APIView):
                     status=status.HTTP_200_OK
                 )
 
-            # Sahiblik və ya admin statusunu yoxla
+            # (Optional) Permission check — fərdi məhsul üzərində
             for product in products_to_delete:
                 if not self.check_object_permissions(request, product):
                     return Response(
@@ -70,7 +71,7 @@ class BulkDeleteProductView(APIView):
                     deleted_count, _ = products_to_delete.delete()
                     if deleted_count != len(found_ids):
                         raise ValidationError("Some products could not be deleted.")
-                
+
                 return Response(
                     {
                         "message": f"{deleted_count} product(s) deleted successfully.",
@@ -84,6 +85,7 @@ class BulkDeleteProductView(APIView):
                     {"error": f"Failed to delete products: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 

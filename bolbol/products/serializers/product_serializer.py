@@ -121,8 +121,11 @@ class ProductDeleteSerializer(serializers.Serializer):
     )
 
     def validate_ids(self, value):
-        # Bütün məhsulları (aktiv və qeyri-aktiv) yoxlayırıq
-        existing_ids = set(Product.objects.all().filter(id__in=value).values_list('id', flat=True))
+        """
+        Gələn ID-lərin mövcud məhsullara uyğun olub olmadığını yoxlayır.
+        Bütün məhsullar (is_active = True və False) nəzərə alınır.
+        """
+        existing_ids = set(Product._base_manager.filter(id__in=value).values_list('id', flat=True))
         invalid_ids = [id for id in value if id not in existing_ids]
         if invalid_ids:
             raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
