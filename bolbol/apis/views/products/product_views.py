@@ -13,7 +13,7 @@ from drf_yasg import openapi
 from django.db.models import Q
 
 
-from products.serializers.product_serializer import ProductDeleteSerializer
+from products.serializers.product_serializer import BulkDeleteProductSerializer
 from products.models import Product
 from products.serializers import (
     ProductCardSerializer, 
@@ -32,64 +32,39 @@ __all__ = (
 )
 
 
-class BulkDeleteProductView(APIView):
+class BulkDeleteProductsAPIView(APIView):
 
-    def delete(self, request, *args, **kwargs):
-        serializer = ProductDeleteSerializer(data=request.data)
-        if serializer.is_valid():
-            ids = serializer.validated_data['ids']
+    def delete(self, request):
+        serializer = BulkDeleteProductSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        ids = serializer.validated_data['ids']
 
-            # Adminlər və adi istifadəçilər üçün is_active filtrini tətbiq etmirik
-            if request.user.is_staff:
-                products_to_delete = Product.objects.filter(
-                    Q(id__in=ids) & (Q(is_active=True) | Q(is_active=False))
-                )
-            else:
-                # Adi istifadəçilər yalnız öz məhsullarını silə bilər
-                products_to_delete = Product.objects.filter(
-                    Q(id__in=ids) & (Q(is_active=True) | Q(is_active=False)) & Q(owner=request.user)
-                )
+        # Adminlər istənilən məhsulu silə bilir, adi istifadəçi yalnız özünü
+        if request.user.is_staff:
+            products = Product.objects.filter(id__in=ids)
+        else:
+            products = Product.objects.filter(id__in=ids, owner=request.user)
 
-            found_ids = list(products_to_delete.values_list('id', flat=True))
-            not_found_ids = list(set(ids) - set(found_ids))
+        found_ids = list(products.values_list('id', flat=True))
+        not_found_ids = list(set(ids) - set(found_ids))
 
-            if not found_ids:
-                return Response(
-                    {
-                        "error": "No products found for the given IDs.",
-                        "not_found_ids": not_found_ids
-                    },
-                    status=status.HTTP_404_NOT_FOUND
-                )
+        if not found_ids:
+            return Response(
+                {"error": "No products found for the given IDs.", "not_found_ids": not_found_ids},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-            # Sahiblik və ya admin statusunu yoxla
-            for product in products_to_delete:
-                if not self.check_object_permissions(request, product):
-                    return Response(
-                        {"error": f"You do not have permission to delete product ID {product.id}"},
-                        status=status.HTTP_403_FORBIDDEN
-                    )
+        try:
+            with transaction.atomic():
+                deleted_count, _ = products.delete()
+        except Exception as e:
+            return Response({"error": f"Deletion failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            try:
-                with transaction.atomic():
-                    deleted_count, _ = products_to_delete.delete()
-                    if deleted_count != len(found_ids):
-                        raise ValidationError("Some products could not be deleted.")
-
-                return Response(
-                    {
-                        "message": f"{deleted_count} product(s) deleted successfully.",
-                        "deleted_ids": found_ids,
-                        "not_found_ids": not_found_ids
-                    },
-                    status=status.HTTP_204_NO_CONTENT
-                )
-            except Exception as e:
-                return Response(
-                    {"error": f"Failed to delete products: {str(e)}"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "message": f"{deleted_count} product(s) deleted successfully.",
+            "deleted_ids": found_ids,
+            "not_found_ids": not_found_ids
+        }, status=status.HTTP_200_OK)
     
 
 class ProductCardListAPIView(APIView):
