@@ -55,9 +55,9 @@ vine==5.1.0
 wcwidth==0.2.13
 zope.interface==7.2
 django-elasticsearch-dsl
+elasticsearch
+elasticsearch-dsl
 gunicorn
-<<<<<<< HEAD
 django-cors-headers
-=======
 whitenoise
->>>>>>> bdd662e60c7d9f3dddc90a36cc939b1cebbcd809
+#kaheb
