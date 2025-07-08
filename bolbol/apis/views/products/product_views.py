@@ -28,7 +28,7 @@ __all__ = (
     "ProductDetailAPIView",
     "ProductCreateAPIView",
     "SimilarProductListAPIView",
-    "BulkDeleteProductView",
+    "BulkDeleteProductsAPIView",
 )
 
 
