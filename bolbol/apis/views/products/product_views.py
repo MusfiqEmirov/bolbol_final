@@ -31,36 +31,31 @@ __all__ = (
 
 
 class BulkDeleteProductView(APIView):
-    
-    @swagger_auto_schema(
-        operation_summary="Seçilmiş məhsulları sil",
-        operation_description="Verilən ID-lərə uyğun məhsulları silir. İstifadəçi yalnız ona məxsus olan məhsulları (və ya admin hüquqları varsa istənilən məhsulu) silə bilər.",
-        request_body=ProductDeleteSerializer,
-        responses={
-            204: openapi.Response(
-                description="Məhsullar uğurla silindi",
-                examples={
-                    "application/json": {
-                        "message": "3 product(s) deleted successfully.",
-                        "deleted_ids": [1, 2, 3],
-                        "not_found_ids": []
-                    }
-                }
-            ),
-            400: "Xəta: Yanlış sorğu məlumatları",
-            403: "İcazə yoxdur",
-            500: "Server xətası"
-        }
-    )
+  
     def delete(self, request, *args, **kwargs):
         serializer = ProductDeleteSerializer(data=request.data)
         if serializer.is_valid():
             ids = serializer.validated_data['ids']
             
-            # Məhsulları tap və sahibini yoxla
-            products_to_delete = Product.objects.filter(id__in=ids)
+            # Adminlər və adi istifadəçilər üçün is_active filtrini tətbiq etmirik
+            if request.user.is_staff:
+                products_to_delete = Product.objects.filter(id__in=ids)
+            else:
+                # Adi istifadəçilər yalnız öz məhsullarını silə bilər
+                products_to_delete = Product.objects.filter(id__in=ids, owner=request.user)
+
             found_ids = list(products_to_delete.values_list('id', flat=True))
             not_found_ids = list(set(ids) - set(found_ids))
+
+            # Əgər heç bir məhsul tapılmayıbsa
+            if not found_ids:
+                return Response(
+                    {
+                        "message": "No products found for the given IDs.",
+                        "not_found_ids": not_found_ids
+                    },
+                    status=status.HTTP_200_OK
+                )
 
             # Sahiblik və ya admin statusunu yoxla
             for product in products_to_delete:
