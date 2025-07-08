@@ -33,7 +33,7 @@ __all__ = (
 
 
 class BulkDeleteProductsAPIView(APIView):
-
+    permission_classes = [IsAuthenticated]
     def delete(self, request):
         serializer = ProductDeleteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
