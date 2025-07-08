@@ -39,9 +39,7 @@ class Product(models.Model):
 
     name = models.CharField(
         "Name", 
-        max_length=255, 
-        null=True,
-        blank=True
+        max_length=255,
     )
 
     category = models.ForeignKey(
