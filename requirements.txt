@@ -59,5 +59,3 @@ elasticsearch
 elasticsearch-dsl
 gunicorn
 django-cors-headers
-elasticsearch
-elasticsearch-dsl
