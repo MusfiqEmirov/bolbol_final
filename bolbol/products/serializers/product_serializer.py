@@ -123,16 +123,25 @@ class ProductDeleteSerializer(serializers.Serializer):
 
     def validate_ids(self, value):
         """
-        Gələn ID-lərin mövcud məhsullara uyğun olub olmadığını yoxlayır.
-        Bütün məhsullar (is_active = True və ya False) nəzərə alınır.
+        Validation:
+        - Are all the provided IDs associated with existing products?
+        - If the user is not an admin, they can only delete their own products.
         """
-        # OR şəklində is_active true və ya false olan məhsulların çəkilməsi
-        existing_ids = set(
-            Product._base_manager.filter(
-                Q(id__in=value) & (Q(is_active=True) | Q(is_active=False))
-            ).values_list('id', flat=True)
-        )
-        invalid_ids = [id for id in value if id not in existing_ids]
+
+        user = self.context['request'].user
+        all_requested_products = Product.objects.filter(id__in=value)
+
+        existing_ids = set(all_requested_products.values_list('id', flat=True))
+        invalid_ids = [i for i in value if i not in existing_ids]
         if invalid_ids:
             raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
+
+        if not user.is_staff:
+            unauthorized_products = all_requested_products.exclude(owner=user)
+            if unauthorized_products.exists():
+                unauthorized_ids = list(unauthorized_products.values_list('id', flat=True))
+                raise serializers.ValidationError(
+                    f"These product(s) do not belong to you. You are not authorized to delete them.: {unauthorized_ids}"
+                )
+
         return value
