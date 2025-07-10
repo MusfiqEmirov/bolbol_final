@@ -42,37 +42,23 @@ __all__ = (
 
 class BulkDeleteProductsAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    http_method_names = ['delete']
+
     def delete(self, request):
-        serializer = ProductDeleteSerializer(data=request.data)
+        serializer = ProductDeleteSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         ids = serializer.validated_data['ids']
 
-        # Əgər admindirsə, bütün məhsulları tap (status və is_active yoxlanmır)
-        if request.user.is_staff:
-            products = Product.objects.filter(id__in=ids)
-        else:
-            # İstifadəçi yalnız öz məhsullarını tapa bilər
-            products = Product.objects.filter(id__in=ids, owner=request.user)
-
-        found_ids = list(products.values_list('id', flat=True))
-        not_found_ids = list(set(ids) - set(found_ids))
-
-        if not found_ids:
-            return Response(
-                {"error": "No products found for the given IDs.", "not_found_ids": not_found_ids},
-                status=status.HTTP_404_NOT_FOUND
-            )
-
         try:
             with transaction.atomic():
-                deleted_count, _ = products.delete()
+                products_to_delete = Product.objects.filter(id__in=ids)
+                deleted_count, _ = products_to_delete.delete()
         except Exception as e:
             return Response({"error": f"Deletion failed: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({
             "message": f"{deleted_count} product(s) deleted successfully.",
-            "deleted_ids": found_ids,
-            "not_found_ids": not_found_ids
+            "deleted_ids": ids
         }, status=status.HTTP_200_OK)
     
 
