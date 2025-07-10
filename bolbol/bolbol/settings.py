@@ -281,13 +281,20 @@ CACHES = {
 # }
 
 # E-mail
-EMAIL_BACKEND ='bolbol.email_backend.EmailBackend'
-EMAIL_HOST = 'mail.smtp2go.com'
-EMAIL_PORT = 2525
-EMAIL_HOST_USER = 'noreply@bolbol.az'
-EMAIL_HOST_PASSWORD = 'c2dnbDRoN2phdmkw'
+# EMAIL_BACKEND ='bolbol.email_backend.EmailBackend'
+# EMAIL_HOST = 'mail.smtp2go.com'
+# EMAIL_PORT = 2525
+# EMAIL_HOST_USER = 'noreply@bolbol.az'
+# EMAIL_HOST_PASSWORD = 'c2dnbDRoN2phdmkw'
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'ebilebilli3@gmail.com'
+EMAIL_HOST_PASSWORD = 'ypzgghresnlbfjza'
 
 # DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
 # FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
