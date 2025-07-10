@@ -1,5 +1,6 @@
 import json
-
+from django.db import transaction
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,35 +8,35 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.db.models import F
-from django.db import transaction
-from django.core.exceptions import ValidationError
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from django.db.models import Q
 
-
-from products.models import Product, ProductPhoto, ReactivationRequest
-from products.serializers import ProductCreateSerializer
-from products.serializers.product_serializer import ProductDeleteSerializer
-
-from products.models import Product
-from products.serializers import (
+from utils.helpers import convert_decimal_to_float
+from utils.algorithms import _get_similar_products
+from products.models import(
+    Product, 
+    ProductPhoto, 
+    ReactivationRequest, 
+    ProductUpdateRequest
+    )
+from products.serializers import(
     ProductCardSerializer, 
     ProductCreateSerializer,
     ProductDetailSerializer,
+    ProductUpdateSerializer,
+    ProductDeleteSerializer
     # ProductDeactivateSerializer
-)
-from utils.algorithms import _get_similar_products
+    )   
+
 
 __all__ = (
     "ProductCardListAPIView",
     "ProductCardListByUserAPIView",
     "ProductDetailAPIView",
-     "ProductDetailByUserAPIView",
+    "ProductDetailByUserAPIView",
     "ProductCreateAPIView",
+    "ProductUpdateRequestAPIView",
     "SimilarProductListAPIView",
     "RequestProductReactivationAPIView",
-    "BulkDeleteProductsAPIView",
+    "BulkDeleteProductView",
 )
 
 
@@ -282,4 +283,56 @@ class ProductCreateAPIView(APIView):
 
             return Response({"id": product.id, "message": "Product created successfully"}, status=status.HTTP_201_CREATED)
         
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class ProductUpdateRequestAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+    http_method_names = ['post']
+
+    def post(self, request, product_slug, *args, **kwargs):
+        product = get_object_or_404(Product, slug=product_slug, owner=request.user)
+
+        if ProductUpdateRequest.objects.filter(product=product, status=ProductUpdateRequest.PENDING).exists():
+            return Response({"error": "An update request is already pending for this product."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not product.is_active:
+            return Response({"error": "This product is not active."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if product.expires_at and product.expires_at < timezone.now():
+            return Response({"error": "Product has already expired."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            owner_data = json.loads(request.data.get("owner") or "{}")
+        except json.JSONDecodeError:
+            return Response({"error": "Invalid JSON format for owner data"}, status=status.HTTP_400_BAD_REQUEST)
+
+        temp_user_data = {}
+        for field in ["full_name", "email"]:
+            if field in owner_data:
+                temp_user_data[field] = owner_data[field]
+
+        serializer = ProductUpdateSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            validated_data = convert_decimal_to_float(serializer.validated_data)
+
+            photos = request.FILES.getlist("photos")
+            photo_data = []
+            for index, image in enumerate(photos):
+                photo_data.append({
+                    "name": image.name,
+                    "size": image.size,
+                    "content_type": image.content_type,
+                })
+
+            ProductUpdateRequest.objects.create(
+                product=product,
+                data=validated_data,
+                user_data=temp_user_data,
+                photo_meta=photo_data,
+                status=ProductUpdateRequest.PENDING
+            )
+
+            return Response({"message": "Update request submitted for moderation."}, status=status.HTTP_202_ACCEPTED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

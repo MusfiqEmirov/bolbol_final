@@ -136,3 +136,26 @@ class ProductDeleteSerializer(serializers.Serializer):
         if invalid_ids:
             raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
         return value
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for update a product with all fields.
+    """
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "category",
+            "city",
+
+            "price",
+            "description",
+            "is_new_product",
+            "is_delivery_available",
+            "is_credit_available",
+            "is_barter_available",
+            "is_via_negotiator",
+
+            "characteristics"
+        ]

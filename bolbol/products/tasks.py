@@ -13,6 +13,13 @@ def send_product_created_email_task(user_email, product_slug):
 
 
 @shared_task
+def send_product_update_request_email_task(user_email, product_slug):
+    subject = 'Elanınız üçün dəyişiklik sorğusu alındı'
+    message = f"Salam, sizin '{product_slug}' elanınız üçün dəyişiklik sorğusu qəbul edildi. Tezliklə moderasiya olunacaq."
+    send_mail_func(user_email, product_slug, subject, message)
+
+
+@shared_task
 def send_reactivation_request_email_task(user_email, product_slug):
     subject = "Elanı aktivləşdirmə istəyi göndərildi"
     message = f"Sizin '{product_slug}' elanınız üçün aktivləşdirmə istəyi qəbul edildi. Qısa zamanda yoxlanacaq."

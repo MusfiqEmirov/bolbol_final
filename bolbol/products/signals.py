@@ -4,9 +4,10 @@ from django.dispatch import receiver
 from utils.helpers import shrink_text, generate_slug
 from .documents import ProductDocument
 
-from .models import Product, ReactivationRequest
+from .models import Product, ReactivationRequest, ProductUpdateRequest
 from products.tasks import(
     send_product_created_email_task,
+    send_product_update_request_email_task,
     send_reactivation_request_email_task,
     send_product_approved_email_task,
     send_product_rejected_email_task
@@ -34,7 +35,7 @@ def delete_product_document(sender, instance, **kwargs):
         pass
 
 
-# Email signals
+@receiver(post_save, sender=ProductUpdateRequest)
 @receiver(post_save, sender=Product)
 def send_created_product_email(sender, instance, created, **kwargs):
     if created:
@@ -42,7 +43,14 @@ def send_created_product_email(sender, instance, created, **kwargs):
             product = Product.objects.get(pk=instance.pk)
             send_product_created_email_task.delay(product.owner.email, product.slug)
         transaction.on_commit(_send_email)
-    
+
+
+@receiver(post_save, sender=ProductUpdateRequest)
+def send_update_request_email(sender, instance, created, **kwargs):
+    if created:
+        def _send_email():
+            send_product_update_request_email_task.delay(instance.product.owner.email, instance.product.slug)
+        transaction.on_commit(_send_email)
 
 
 @receiver(post_save, sender=ReactivationRequest)
@@ -70,9 +78,11 @@ def check_status_change_on_product(sender, instance, **kwargs):
 
     if previous.status != instance.status:
         if instance.status == Product.APPROVED:
+            instance.is_active = True 
             send_product_approved_email_task.delay(user_email, product_slug)
 
         elif instance.status == Product.REJECTED:
+            instance.is_active = False
             send_product_rejected_email_task.delay(user_email, product_slug)
 
 
