@@ -24,7 +24,7 @@ class ProductOwnerMiniProfileSerializer(serializers.ModelSerializer):
             "phone_number",
             "full_name",
             "is_shop_profile",
-            "available_products_count"
+            "active_products_count"
         )
 
 

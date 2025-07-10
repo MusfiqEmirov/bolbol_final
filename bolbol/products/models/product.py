@@ -1,15 +1,16 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from datetime import timedelta
+from django.utils import timezone
 
 from utils.configs import ProductConfig
 from utils.helpers import shrink_text, generate_slug
+from utils.validators import az_slug_validator, max_30_days_validator, min_7_days_validator
 from django.urls import reverse
 
+
 __all__ = ("Product",)
-
-
-
 
 class Product(models.Model):
     PREMIUM = "pre"
@@ -142,6 +143,8 @@ class Product(models.Model):
         "Slug",
         max_length=255,
         unique=True,
+        validators=[az_slug_validator],
+        allow_unicode=True,
         null=True,
         blank=True
     )
@@ -161,7 +164,8 @@ class Product(models.Model):
     expires_at = models.DateTimeField(
         "Expires at", 
         null=True, 
-        blank=True
+        blank=True,
+        validators=[min_7_days_validator, max_30_days_validator]
     )
 
     class Meta:
@@ -171,19 +175,15 @@ class Product(models.Model):
 
     def __str__(self) -> str:
         return shrink_text(self.name, 25)
+    
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(days=30)
 
-    # def save(self, *args, **kwargs):
-    #     if not self.pk:  
-    #         super().save(*args, **kwargs)
-
-    #     if not self.slug:
-    #         self.slug = f"{self.pk}-{generate_slug(self.name)}"
-
-    #     return super().save(*args, **kwargs)
-
-    @property
-    def title(self) -> str:
-        return self.name
+        super().save(*args, **kwargs)
+        @property
+        def title(self) -> str:
+            return self.name
 
     def get_absolute_url(self) -> str:
         return reverse("apis:product-detail", kwargs={"product_slug": self.slug})

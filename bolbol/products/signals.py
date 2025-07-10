@@ -1,10 +1,16 @@
-from django.db.models.signals import post_save, post_delete
+from django.db import transaction
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from utils.helpers import shrink_text, generate_slug
 from .documents import ProductDocument
 
-from .models import Product
-from products.tasks import send_product_created_email_task
+from .models import Product, ReactivationRequest
+from products.tasks import(
+    send_product_created_email_task,
+    send_reactivation_request_email_task,
+    send_product_approved_email_task,
+    send_product_rejected_email_task
+)
 
 
 @receiver(post_save, sender=Product)
@@ -14,6 +20,7 @@ def set_product_slug(sender, instance, created, **kwargs):
         Product.objects.filter(pk=instance.pk).update(slug=slug)
 
 
+# Elasticsearch signals
 @receiver(post_save, sender=Product)
 def update_product_document(sender, instance, **kwargs):
     ProductDocument().update(instance)
@@ -29,9 +36,43 @@ def delete_product_document(sender, instance, **kwargs):
 
 # Email signals
 @receiver(post_save, sender=Product)
-def set_product_slug(sender, instance, created, **kwargs):
+def send_created_product_email(sender, instance, created, **kwargs):
+    if created:
+        def _send_email():
+            product = Product.objects.get(pk=instance.pk)
+            send_product_created_email_task.delay(product.owner.email, product.slug)
+        transaction.on_commit(_send_email)
+    
+
+
+@receiver(post_save, sender=ReactivationRequest)
+def send_reactivation_email_signal(sender, instance, created, **kwargs):
+    if created:
+        def _send_email():
+            user_email = instance.user.email
+            product_slug = instance.product.slug
+            send_reactivation_request_email_task.delay(user_email, product_slug)
+        
+        transaction.on_commit(_send_email)
+
+
+@receiver(pre_save, sender=Product)
+def check_status_change_on_product(sender, instance, **kwargs):
     user_email = instance.owner.email
     product_slug = instance.slug
-    send_product_created_email_task.delay(user_email, product_slug)
+
+    if not instance.id:
+        return
+    try:
+        previous = Product.objects.get(id=instance.id)
+    except Product.DoesNotExist:
+        return
+
+    if previous.status != instance.status:
+        if instance.status == Product.APPROVED:
+            send_product_approved_email_task.delay(user_email, product_slug)
+
+        elif instance.status == Product.REJECTED:
+            send_product_rejected_email_task.delay(user_email, product_slug)
 
 

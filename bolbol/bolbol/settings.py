@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "celery",
+    "django_celery_beat",
     "django_celery_results",
     "redis",
     'django_elasticsearch_dsl',
@@ -140,9 +141,17 @@ WSGI_APPLICATION = "bolbol.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3"
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 600,  
+        'OPTIONS': {
+            'sslmode': 'disable',
+        },
     }
 }
 
@@ -225,6 +234,17 @@ CELERY_RESULT_BACKEND = "django-cache"
 # CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 # CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379")
 CELERY_BROKER_URL = 'redis://redis:6379/0'
+
+# Celery beat 
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "deactivate-expired-products-daily": {
+        "task": "products.tasks.deactivate_expired_products",
+        "schedule": crontab(hour=0, minute=0),  # Hər gecə saat 00:00-da
+    },
+}
+
 # Cache
 CACHES = {
     "default": {

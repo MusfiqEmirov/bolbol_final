@@ -14,7 +14,7 @@ from drf_yasg import openapi
 from django.db.models import Q
 
 
-from products.models import Product, ProductPhoto
+from products.models import Product, ProductPhoto, ReactivationRequest
 from products.serializers import ProductCreateSerializer
 from products.serializers.product_serializer import ProductDeleteSerializer
 
@@ -29,9 +29,12 @@ from utils.algorithms import _get_similar_products
 
 __all__ = (
     "ProductCardListAPIView",
+    "ProductCardListByUserAPIView",
     "ProductDetailAPIView",
+     "ProductDetailByUserAPIView",
     "ProductCreateAPIView",
     "SimilarProductListAPIView",
+    "RequestProductReactivationAPIView",
     "BulkDeleteProductsAPIView",
 )
 
@@ -96,6 +99,31 @@ class ProductCardListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class ProductCardListByUserAPIView(APIView):
+    """List user's active products with key info."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        products = Product.objects.filter(owner=request.user).only(
+            "name", "city__name", "updated_at", "price",
+            "is_delivery_available", "is_barter_available", "is_credit_available",
+            "is_super_chance", "is_premium", "is_vip"
+        )
+
+        is_vip = request.query_params.get("is_vip")
+        is_premium = request.query_params.get("is_premium")
+
+        if is_vip is not None:
+            products = products.filter(is_vip=is_vip.lower() == "true")
+
+        if is_premium is not None:
+            products = products.filter(is_premium=is_premium.lower() == "true")
+
+        serializer = ProductCardSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class ProductDetailAPIView(APIView):
     """Endpoint to retrieve detailed product information."""
     http_method_names = ["get"]
@@ -103,6 +131,23 @@ class ProductDetailAPIView(APIView):
     def get(self, request, product_slug, *args, **kwargs):
         product_pk = product_slug.split("-", 1)[0]
         product = get_object_or_404(Product, pk=product_pk, is_active=True)
+
+        product.views_count = F("views_count") + 1
+        product.save()
+        product.refresh_from_db()
+
+        serializer = ProductDetailSerializer(product)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ProductDetailByUserAPIView(APIView):
+    """Retrieve user's active product detail."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    def get(self, request, product_slug, *args, **kwargs):
+        product_pk = product_slug.split("-", 1)[0]
+        product = get_object_or_404(Product, pk=product_pk, owner=request.user)
 
         product.views_count = F("views_count") + 1
         product.save()
@@ -122,6 +167,33 @@ class SimilarProductListAPIView(APIView):
         similar_products = _get_similar_products(main_product)
         serializer = ProductCardSerializer(similar_products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RequestProductReactivationAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+
+    def post(self, request, product_slug):
+        product_pk = product_slug.split("-", 1)[0]
+        try:
+            product = Product.objects.get(pk=product_pk, owner=request.user)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found."}, status=404)
+
+        if product.is_active:
+            return Response({"detail": "Product is already active."}, status=400)
+
+        exists = ReactivationRequest.objects.filter(
+            product=product,
+            user=request.user,
+            status=ReactivationRequest.PENDING
+        ).exists()
+
+        if exists:
+            return Response({"detail": "You already have a pending reactivation request."}, status=400)
+
+        ReactivationRequest.objects.create(product=product, user=request.user)
+        return Response({"detail": "Reactivation request sent successfully."}, status=201)
 
 
 # class ProductCreateAPIView(APIView):
