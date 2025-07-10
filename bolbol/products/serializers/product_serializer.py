@@ -127,7 +127,6 @@ class ProductDeleteSerializer(serializers.Serializer):
         - Are all the provided IDs associated with existing products?
         - If the user is not an admin, they can only delete their own products.
         """
-
         user = self.context['request'].user
         all_requested_products = Product.objects.filter(id__in=value)
 
@@ -145,3 +144,24 @@ class ProductDeleteSerializer(serializers.Serializer):
                 )
 
         return value
+
+      
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for update a product with all fields.
+    """
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "category",
+            "city",
+            "price",
+            "description",
+            "is_new_product",
+            "is_delivery_available",
+            "is_credit_available",
+            "is_barter_available",
+            "is_via_negotiator",
+            "characteristics"
+        ]

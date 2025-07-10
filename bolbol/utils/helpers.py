@@ -1,4 +1,5 @@
 from typing import Optional
+from decimal import Decimal
 from utils.configs import OTPConfig
 
 __all__ = (
@@ -84,3 +85,14 @@ def mask_user_fullname(full_name: Optional[str]) -> str:
     words = full_name.split()
     masked_words = [f"{word[0]}***" for word in words]
     return " ".join(masked_words)
+
+
+def convert_decimal_to_float(data):
+    if isinstance(data, dict):
+        return {k: convert_decimal_to_float(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_decimal_to_float(i) for i in data]
+    elif isinstance(data, Decimal):
+        return float(data)
+    else:
+        return data

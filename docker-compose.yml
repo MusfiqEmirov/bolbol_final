@@ -8,17 +8,19 @@ services:
     restart: always
     env_file: ".env"
     depends_on:
+      - db
       - redis
       - elasticsearch 
     volumes:
+      - .:/code
       - ./static:/code/bolbol/static
       - ./uploads:/code/bolbol/uploads
     ports:
        - "80:8000"
+    working_dir: /code/bolbol
     networks:
       - backend
     command: /bin/sh -c "python manage.py collectstatic --noinput && gunicorn bolbol.wsgi:application --bind 0.0.0.0:8000 --forwarded-allow-ips='*'"
-
 
   celery:
     build:
@@ -26,8 +28,48 @@ services:
       dockerfile: Dockerfile.celery
     container_name: celery_worker
     restart: always
+    env_file: .env
     depends_on:
+      - db
       - redis
+    volumes:
+      - .:/code
+    working_dir: /code/bolbol
+    command: celery -A bolbol worker --loglevel=info
+    environment:
+      - DJANGO_SETTINGS_MODULE=bolbol.settings
+    networks:
+      - backend
+    
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+    container_name: celery_beat
+    restart: always
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+      - celery
+    networks:
+      - backend
+    working_dir: /code/bolbol
+    command: celery -A bolbol beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  db:
+    image: postgres:14
+    container_name: bolbol_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     networks:
       - backend
 
@@ -76,6 +118,9 @@ services:
       - /etc/letsencrypt/archive/pi.backend.az/:/etc/letsencrypt/archive/pi.backend.az/:ro
     networks:
       - backend
+
+volumes:
+  postgres_data:
 
 networks:
   backend:

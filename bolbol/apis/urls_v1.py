@@ -23,6 +23,11 @@ urlpatterns = [
         name="product-cards"
     ),
     path(
+        "product-cards/mine/",
+        ProductCardListByUserAPIView.as_view(),
+        name="user-product-cards"
+    ),
+    path(
         "products/",
         ProductCreateAPIView.as_view(),
         name="product-create"
@@ -32,12 +37,21 @@ urlpatterns = [
         ProductDetailAPIView.as_view(),
         name="product-detail"
     ),
+     path(
+        "products/mine/<slug:product_slug>/",
+        ProductDetailByUserAPIView.as_view(),
+        name="user-product-detail"
+    ),
     path(
         "similar-products/<slug:product_slug>/",
         SimilarProductListAPIView.as_view(),
         name="similar-product-list"
     ),
-
+    path(
+        "products/reactivation/<slug:product_slug>/",
+        RequestProductReactivationAPIView.as_view(),
+        name="reactivation-product"
+    ),
     path(
         "transport-products/",
         TransportProductFilterAPIView.as_view(),

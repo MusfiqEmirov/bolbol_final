@@ -5,3 +5,4 @@ from .product_photo_admin import *
 from .wishlist_admin import *
 from .comment_admin import *
 from .complaint_admin import *
+from .moderation_requests_admin import *
