@@ -36,7 +36,8 @@ __all__ = (
     "ProductUpdateRequestAPIView",
     "SimilarProductListAPIView",
     "RequestProductReactivationAPIView",
-    "BulkDeleteProductView",
+    "BulkDeleteProductsAPIView",
+    
 )
 
 

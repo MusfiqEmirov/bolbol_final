@@ -61,3 +61,4 @@ elasticsearch-dsl
 gunicorn
 django-cors-headers
 psycopg2-binary>=2.9
+whitenoise
