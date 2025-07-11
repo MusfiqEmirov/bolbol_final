@@ -94,7 +94,8 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "django_celery_results",
     "redis",
-    'django_elasticsearch_dsl',
+    "django_elasticsearch_dsl",
+    "storages",
 
     # Apps
     "users",
@@ -115,7 +116,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 ROOT_URLCONF = "bolbol.urls"
 
 TEMPLATES = [
@@ -186,15 +187,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
-MEDIA_URL = "uploads/"
-MEDIA_ROOT = BASE_DIR / "uploads"   
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -209,13 +201,13 @@ REST_FRAMEWORK = {
 
 # JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
-    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=2),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=int(os.getenv('ACCESS_TOKEN_LIFETIME_DAYS'))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=int(os.getenv('REFRESH_TOKEN_LIFETIME_WEEKS'))),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("bolbol",),
+    "AUTH_HEADER_TYPES": (os.getenv('JWT_AUTH_HEADER_TYPE'))
 }
 
 # SMS-notifications
@@ -318,3 +310,35 @@ SWAGGER_SETTINGS = {
     "USE_SESSION_AUTH": False,
     "DEFAULT_API_URL": "https://pi.backend.az/",
 }
+
+# AWS configurations
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False 
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "location": "media",
+            "file_overwrite": False,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+        "OPTIONS": {
+            "location": "static",
+        },
+    },
+}
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
