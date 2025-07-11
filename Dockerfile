@@ -19,4 +19,4 @@ RUN pip install --upgrade pip setuptools wheel && \
 COPY . /code/
 
 # Statik faylları topla
-# RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
