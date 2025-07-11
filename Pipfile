@@ -18,6 +18,8 @@ django-elasticsearch = "*"
 daphne = "*"
 faker = "*"
 pyautogui = "*"
+django-storages = '*'
+boto3 = '*'
 
 [dev-packages]
 

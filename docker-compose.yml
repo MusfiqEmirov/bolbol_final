@@ -110,8 +110,6 @@ services:
     depends_on:
       - web
     volumes:
-      - ./static:/app/static:ro
-      - ./uploads:/app/uploads:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - /etc/letsencrypt/live/pi.backend.az/:/etc/letsencrypt/live/pi.backend.az/:ro
