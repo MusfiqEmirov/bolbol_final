@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "redis",
     "django_elasticsearch_dsl",
+    'storages',
 
     # Apps
     "users",
@@ -201,11 +202,11 @@ REST_FRAMEWORK = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATIC_URL = "static/"
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-MEDIA_URL = "uploads/"
-MEDIA_ROOT = BASE_DIR / "uploads"   
+# MEDIA_URL = "uploads/"
+# MEDIA_ROOT = BASE_DIR / "uploads"   
 
 # JWT
 SIMPLE_JWT = {
@@ -318,3 +319,17 @@ SWAGGER_SETTINGS = {
     "USE_SESSION_AUTH": False,
     "DEFAULT_API_URL": "https://pi.backend.az/",
 }
+
+# AWS S3 ayarları
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-north-1')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
