@@ -18,7 +18,11 @@ services:
     working_dir: /code/bolbol
     networks:
       - backend
-    command: /bin/sh -c "python manage.py collectstatic --noinput && gunicorn bolbol.wsgi:application --bind 0.0.0.0:8000 --forwarded-allow-ips='*'"
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    command: /bin/sh -c "python manage.py collectstatic --noinput && gunicorn bolbol.wsgi:application --bind 0.0.0.0:8000"
+
 
   celery:
     build:
