@@ -13,8 +13,6 @@ services:
       - elasticsearch 
     volumes:
       - .:/code
-      - ./static:/code/bolbol/static
-      - ./uploads:/code/bolbol/uploads
     ports:
        - "80:8000"
     working_dir: /code/bolbol
