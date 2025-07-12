@@ -12,6 +12,7 @@ from products.models import Product
 from shops.models import Shop, ShopActivity
 from shops.serializers import (
     ShopSerializer,
+    ShopDetailSerializer,
     ShopRegistrationRequestSerializer,
     ShopActivitySerializer,
     ShopUpdateSerializer
@@ -21,11 +22,11 @@ from utils.constants import TimeIntervals
 
 __all__ = (
     "ShopListAPIView",
+    "ShopDetailAPIView",
     "ProductCardListByShopAPIView",
     "ShopActivityListAPIView",
     "ShopRegistrationRequestAPIView",
     "ShopUpdateAPIView",
-    "ProductCardListByShopAPIView",
 )
 
 
@@ -72,6 +73,17 @@ class ShopListAPIView(APIView):
         shops = Shop.objects.all()
         serializer = ShopSerializer(shops, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ShopDetailAPIView(APIView):
+    """Retrieve shop profile."""
+    permission_classes = [AllowAny]
+    http_method_names = ['get']
+
+    def get(self, request, shop_id):
+        shop = get_object_or_404(Shop, id=shop_id)
+        serializer = ShopDetailSerializer(shop)
+        return Response(serializer.data)
 
 
 class ProductCardListByShopAPIView(APIView):
