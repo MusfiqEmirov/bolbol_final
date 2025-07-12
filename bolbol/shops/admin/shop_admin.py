@@ -5,7 +5,6 @@ from shops.models import (
     ShopWorkingHours
 )
 
-
 class ShopContactInline(admin.TabularInline):
     model = ShopContact
     extra = 1
