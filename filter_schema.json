@@ -126,7 +126,20 @@
                   }
                 ]
             },
-            "AnotherSubcategory": {}
+            "AnotherSubcategory": {},
+            "NoutbuklarVəNetbuklar": {},
+            "KomponentlərVəMonitorlar": {},
+            "AudioVəVideo": {},
+            "OyunlarPultlarVəProqramlar": {},
+            "KompüterAksesuarları": {},
+            "TelevizorlarVəAksesuarlar": {},
+            "ŞəbəkəVəServerAvadanlığı": {},
+            "NömrələrVəSIM-kartlar": {},
+            "Fototexnika": {},
+            "OfisAvadanlığıVəIstehlakMaterialları": {},
+            "MasaüstüKompüterlər": {},
+            "SmartSaatVəQolbaqlar": {},
+            "PlanşetVəElektronKitablar": {}
         }
     },
     "Ev və Bağ üçün": {
