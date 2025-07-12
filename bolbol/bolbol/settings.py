@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "pi.backend.az",
     "localhost",
+    "85.132.18.12", 
 ]
 
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
@@ -74,6 +75,7 @@ CSRF_TRUSTED_ORIGINS = [
     # "https://www.konum24.az",
     "https://bolbol-three.vercel.app",
     "http://bolbol-three.vercel.app",
+    "https://85.132.18.12",  
 ]
 
 INSTALLED_APPS = [
