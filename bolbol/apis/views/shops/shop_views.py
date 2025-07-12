@@ -1,5 +1,6 @@
 import json
 
+from django.shortcuts import get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from rest_framework.views import APIView
@@ -7,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 
+from products.models import Product
 from shops.models import Shop, ShopActivity
 from shops.serializers import (
     ShopSerializer,
@@ -14,13 +16,16 @@ from shops.serializers import (
     ShopActivitySerializer,
     ShopUpdateSerializer
 )
+from products.serializers import ProductCardSerializer
 from utils.constants import TimeIntervals
 
 __all__ = (
     "ShopListAPIView",
+    "ProductCardListByShopAPIView",
     "ShopActivityListAPIView",
     "ShopRegistrationRequestAPIView",
-    "ShopUpdateAPIView"
+    "ShopUpdateAPIView",
+    "ProductCardListByShopAPIView",
 )
 
 
@@ -66,6 +71,32 @@ class ShopListAPIView(APIView):
     def get(self, request):
         shops = Shop.objects.all()
         serializer = ShopSerializer(shops, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ProductCardListByShopAPIView(APIView):
+    """Retrieve all products by shop."""
+    permission_classes = [AllowAny]
+    http_method_names = ['get']
+
+    def get(self, request, shop_id):
+        shop = get_object_or_404(Shop, id=shop_id)
+        products = Product.objects.filter(is_active=True, owner=shop.owner).only(
+            "name", "city__name", "updated_at", "price",
+            "is_delivery_available", "is_barter_available", "is_credit_available",
+            "is_super_chance", "is_premium", "is_vip"
+        )
+
+        is_vip = request.query_params.get("is_vip")
+        is_premium = request.query_params.get("is_premium")
+
+        if is_vip is not None:
+            products = products.filter(is_vip=is_vip.lower() == "true")
+
+        if is_premium is not None:
+            products = products.filter(is_premium=is_premium.lower() == "true")
+
+        serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -127,3 +158,5 @@ class ShopUpdateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
