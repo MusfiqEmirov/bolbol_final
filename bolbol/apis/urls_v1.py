@@ -121,6 +121,11 @@ urlpatterns = [
         name="shop-list"
     ),
     path(
+        "shops/<int:shop_id>/product-cards/",
+        ProductCardListByShopAPIView.as_view(),
+        name="shop-product-cards"
+    ),
+    path(
         "shop-activities/",
         ShopActivityListAPIView.as_view(), 
         name="shop-activity-list"
@@ -149,6 +154,12 @@ urlpatterns = [
         CommentCreateAPIView.as_view(), 
         name="comment-create"
     ),
+    path(
+        "comments/comment_id", 
+        CommentDeleteAPIView.as_view(), 
+        name="delete-comment"
+    ),
+
 
     # Complaints endpoint
     path(

@@ -242,7 +242,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "deactivate-expired-products-daily": {
         "task": "products.tasks.deactivate_expired_products",
-        "schedule": crontab(hour=0, minute=0),  # Hər gecə saat 00:00-da
+        "schedule": crontab(hour=0, minute=0),  # Every night at 0:00 clock
     },
 }
 
@@ -320,7 +320,7 @@ SWAGGER_SETTINGS = {
     "DEFAULT_API_URL": "https://pi.backend.az/",
 }
 
-# AWS S3 ayarları
+# AWS S3 configurations
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')

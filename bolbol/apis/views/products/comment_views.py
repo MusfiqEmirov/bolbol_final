@@ -11,6 +11,7 @@ from products.serializers import CommentCreateSerializer, CommentSerializer
 __all__ = (
     "CommentsByProductAPIView",
     "CommentCreateAPIView",
+    "CommentDeleteAPIView",
 )
 
 
@@ -41,3 +42,17 @@ class CommentCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentDeleteAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["delete"]
+
+    def delete(self, request, comment_id, *args, **kwargs):
+        user = request.user
+        comment = get_object_or_404(
+            Comment.objects.filter(author=user), 
+            id=comment_id
+        )
+        comment.delete()
+        return Response({'message': 'Comment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
