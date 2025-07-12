@@ -6,9 +6,9 @@ from elasticsearch_dsl import Q
 
 from shops.documents import ShopDocument
 
-__all__ = [
-    "ShopsSearchAPIView"
-]
+__all__ = (
+    "ShopsSearchAPIView",
+)
 
 class ShopsSearchAPIView(APIView):
     permission_classes = [AllowAny]

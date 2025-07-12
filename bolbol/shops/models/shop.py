@@ -3,6 +3,8 @@ from django.db import models
 from utils.validators import validate_phone_number
 from utils.constants import TimeIntervals
 
+from products.models import Product
+
 __all__ = (
     "Shop",
     "ShopContact",
@@ -109,6 +111,10 @@ class Shop(models.Model):
     class Meta:
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
+    
+    @property
+    def get_product_count(self):
+        return Product.objects.filter(owner=self.owner).count()
 
     def __str__(self):
         return f"{self.name}"
