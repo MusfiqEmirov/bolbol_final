@@ -9,10 +9,10 @@ from utils.paginations import ProductPagination
 
 
 __all__ = [
-    "ProductSearchAPIView"
+    "ProductsSearchAPIView"
 ]
 
-class ProductSearchAPIView(APIView):
+class ProductsSearchAPIView(APIView):
     permission_classes = [AllowAny]
     http_method_names = ["get"]
 
