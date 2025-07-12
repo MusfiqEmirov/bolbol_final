@@ -165,6 +165,11 @@ urlpatterns = [
         ShopsSearchAPIView.as_view(),
         name="shops-search"
     ),
+    path(
+        "shops/filter/",
+        ShopFilterAPIView.as_view(),
+        name="shops-filter"
+    ),
 
     # Partner Companies endpoint
     path(

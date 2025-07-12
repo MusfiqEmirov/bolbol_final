@@ -5,7 +5,6 @@ from shops.models import Shop
 
 product_index = Index('shops')  
 
-
 @registry.register_document
 class ShopDocument(Document):
     name = fields.TextField(
@@ -26,6 +25,8 @@ class ShopDocument(Document):
         'name': fields.TextField(),
     })
 
+    product_count = fields.IntegerField(attr='get_product_count')
+
     class Index:
         name = 'shops'
         settings = {
@@ -44,5 +45,5 @@ class ShopDocument(Document):
             'map_longitude',
             'is_active',
             'created_at',
-            'updated_at'
+            'updated_at',
         ]
