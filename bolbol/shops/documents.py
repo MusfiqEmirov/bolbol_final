@@ -5,6 +5,7 @@ from shops.models import Shop
 
 product_index = Index('shops')  
 
+
 @registry.register_document
 class ShopDocument(Document):
     name = fields.TextField(
@@ -43,6 +44,5 @@ class ShopDocument(Document):
             'map_longitude',
             'is_active',
             'created_at',
-            'updated_at',
-            'shop_working_hours_data',
+            'updated_at'
         ]
