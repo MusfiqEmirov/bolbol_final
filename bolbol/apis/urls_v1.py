@@ -13,9 +13,9 @@ urlpatterns = [
         name='bulk-delete-products'
     ),
     path(
-        "search/",
-        ProductSearchAPIView.as_view(),
-        name="product-search"
+        "products/search/",
+        ProductsSearchAPIView.as_view(),
+        name="products-search"
     ),
     path(
         "product-cards/",
@@ -159,6 +159,11 @@ urlpatterns = [
         "shop-registration-requests/",
         ShopRegistrationRequestAPIView.as_view(),
         name="shop-registration-request"
+    ),
+    path(
+        "shops/search/",
+        ShopsSearchAPIView.as_view(),
+        name="shops-search"
     ),
 
     # Partner Companies endpoint

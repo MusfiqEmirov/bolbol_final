@@ -14,18 +14,6 @@ from shops.models import(
 #         fields = "__all__"
 
 
-class ShopSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Shop
-        fields = [
-            "id",
-            "name",
-            "logo",
-            "city_name",
-            "is_active",
-        ]
-
-
 class ShopContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopContact
@@ -39,6 +27,19 @@ class ShopWorkingHoursSerializer(serializers.ModelSerializer):
             "day_of_week",
             "opening_time", 
             "closing_time"
+        ]
+
+
+class ShopSerializer(serializers.ModelSerializer):
+    contacts = ShopContactSerializer(many=True, read_only=True)
+    class Meta:
+        model = Shop
+        fields = [
+            "id",
+            "name",
+            "logo",
+            "city_name",
+            "is_active",
         ]
 
 
