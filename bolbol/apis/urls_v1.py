@@ -131,6 +131,26 @@ urlpatterns = [
         name="shop-product-cards"
     ),
     path(
+        "shops/contacts/",
+        CreateShopContactAPIView.as_view(),
+        name="create-shop-contacts"
+    ),
+    path(
+        "shops/working-hours/",
+        ShopWorkingHoursAPIView.as_view(),
+        name="create-working-hours"
+    ),
+    path(
+        "shops/<int:contact_id>/contacts/",
+        ShopContactsAPIView.as_view(),
+        name="shop-contacts"
+    ),
+    path(
+        "shops/<int:working_hours_id>/working-hours/",
+        ShopWorkingHoursAPIView.as_view(),
+        name="shop-working-hours"
+    ),
+    path(
         "shop-activities/",
         ShopActivityListAPIView.as_view(), 
         name="shop-activity-list"

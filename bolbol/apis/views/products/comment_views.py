@@ -55,4 +55,4 @@ class CommentDeleteAPIView(APIView):
             id=comment_id
         )
         comment.delete()
-        return Response({'message': 'Comment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
