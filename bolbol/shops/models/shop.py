@@ -114,7 +114,9 @@ class Shop(models.Model):
     
     @property
     def get_product_count(self):
-        return Product.objects.filter(owner=self.owner).count()
+        return Product.objects.filter(
+            is_active=True, owner=self.owner
+        ).count()
 
     def __str__(self):
         return f"{self.name}"
