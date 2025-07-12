@@ -121,6 +121,11 @@ urlpatterns = [
         name="shop-list"
     ),
     path(
+        "shops/shop_id",
+        ShopDetailAPIView.as_view(),
+        name="shop-profile"
+    ),
+    path(
         "shops/<int:shop_id>/product-cards/",
         ProductCardListByShopAPIView.as_view(),
         name="shop-product-cards"
