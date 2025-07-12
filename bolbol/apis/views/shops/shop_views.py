@@ -9,10 +9,17 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 
 from products.models import Product
-from shops.models import Shop, ShopActivity
+from shops.models import (
+    Shop,
+    ShopWorkingHours,
+    ShopContact, 
+    ShopActivity
+)
 from shops.serializers import (
     ShopSerializer,
     ShopDetailSerializer,
+    ShopWorkingHoursSerializer,
+    ShopContactSerializer,
     ShopRegistrationRequestSerializer,
     ShopActivitySerializer,
     ShopUpdateSerializer
@@ -26,7 +33,11 @@ __all__ = (
     "ProductCardListByShopAPIView",
     "ShopActivityListAPIView",
     "ShopRegistrationRequestAPIView",
+    "CreateShopContactAPIView",
     "ShopUpdateAPIView",
+    "ShopContactsAPIView",
+    "CreateShopWorkingHoursAPIView",
+    "ShopWorkingHoursAPIView"
 )
 
 
@@ -170,5 +181,74 @@ class ShopUpdateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
+
+class CreateShopContactAPIView(APIView):
+    """Create contact for shop."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+
+    def post(self, request):
+        shop = Shop.objects.filter(owner=request.user).first()
+        if not shop:
+            return Response({"detail": "You must create a shop first."}, status=400)
+        serializer = ShopContactSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(shop=shop)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+
+class ShopContactsAPIView(APIView):
+    """Update or delete a shop contact by ID."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, contact_id):
+        contact_id = request.contact.id
+        contact = get_object_or_404(ShopContact, id=contact_id)
+        serializer = ShopContactSerializer(contact, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, contact_id):
+        contact = get_object_or_404(ShopContact, id=contact_id)
+        contact.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CreateShopWorkingHoursAPIView(APIView):
+    """Create working hours for shop."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['post']
+
+    def post(self, request):
+        shop = Shop.objects.filter(owner=request.user).first()
+        if not shop:
+            return Response({"detail": "You must create a shop first."}, status=400)
+        serializer = ShopWorkingHoursSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(shop=shop)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+
+class ShopWorkingHoursAPIView(APIView):
+    """Update or delete a shop's working hours by ID."""
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['patch', 'delete']
+
+    def patch(self, request, working_hour_id):
+        working_hour = get_object_or_404(ShopWorkingHours, id=working_hour_id)
+        serializer = ShopWorkingHoursSerializer(working_hour, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, working_hour_id):
+        working_hour = get_object_or_404(ShopWorkingHours, id=working_hour_id)
+        working_hour.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

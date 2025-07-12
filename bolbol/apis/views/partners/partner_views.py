@@ -18,3 +18,5 @@ class PartnerCompanyListAPIView(APIView):
         serializer = PartnerCompanySerializer(partner_companies, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+

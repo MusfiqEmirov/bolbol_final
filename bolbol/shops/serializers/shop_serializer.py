@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from shops.models import Shop, ShopRegistrationRequest
-from shops.models import ShopActivity
+from shops.models import(
+    Shop,
+    ShopContact,
+    ShopWorkingHours, 
+    ShopRegistrationRequest, 
+    ShopActivity
+)
 
 
 # class ShopSerializer(serializers.ModelSerializer):
@@ -21,7 +26,26 @@ class ShopSerializer(serializers.ModelSerializer):
         ]
 
 
+class ShopContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShopContact
+        fields = ["phone_number"]
+
+
+class ShopWorkingHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShopWorkingHours
+        fields = [
+            "day_of_week",
+            "opening_time", 
+            "closing_time"
+        ]
+
+
 class ShopDetailSerializer(serializers.ModelSerializer):
+    contacts = ShopContactSerializer(many=True, read_only=True)
+    working_hours = ShopWorkingHoursSerializer(many=True, read_only=True)
+
     class Meta:
         model = Shop
         fields = [
