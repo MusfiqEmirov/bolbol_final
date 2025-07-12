@@ -16,8 +16,8 @@ class ShopDocument(Document):
     )
 
     activities = fields.NestedField(properties={
-        'id': fields.IntegerField(),
-        'name': fields.TextField(),
+    'id': fields.IntegerField(),
+    'name': fields.TextField(fields={'keyword': fields.KeywordField()}),
     })
 
     city = fields.ObjectField(properties={

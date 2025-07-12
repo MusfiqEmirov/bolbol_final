@@ -24,8 +24,11 @@ class ShopFilterAPIView(APIView):
         search = ShopDocument.search()
 
         if activities:
-            filter_activities = Q("terms", **{"activities.name.keyword": activities})
-            search = search.filter(filter_activities)
+            nested_query = Q(
+                "nested", 
+                path="activities", 
+                query=Q("terms", **{"activities.name.keyword": activities}))
+            search = search.filter(nested_query)
 
         if sort == "name_asc":
             search = search.sort('name.raw')
