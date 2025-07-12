@@ -149,6 +149,12 @@ urlpatterns = [
         CommentCreateAPIView.as_view(), 
         name="comment-create"
     ),
+    path(
+        "comments/comment_id", 
+        CommentDeleteAPIView.as_view(), 
+        name="delete-comment"
+    ),
+
 
     # Complaints endpoint
     path(
