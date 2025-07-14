@@ -1,3 +1,5 @@
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -16,6 +18,39 @@ class ShopFilterAPIView(APIView):
     """
     permission_classes = [AllowAny]
     http_method_names = ["get"]
+
+    activities_param = openapi.Parameter(
+    'activities',
+    openapi.IN_QUERY,
+    description="List of activity names (can be multiple, e.g., ?activities=Cleaning&activities=Delivery)",
+    type=openapi.TYPE_ARRAY,
+    items=openapi.Items(type=openapi.TYPE_STRING),
+    collection_format='multi'
+    )
+    sort_param = openapi.Parameter(
+    'sort',
+    openapi.IN_QUERY,
+    description="Sorting method: name_asc, name_desc, product_count_desc, or random",
+    type=openapi.TYPE_STRING,
+    enum=['name_asc', 'name_desc', 'product_count_desc', 'random']
+    )
+    
+    @swagger_auto_schema(
+        manual_parameters=[activities_param, sort_param],
+        operation_summary="Filter and sort shops",
+        operation_description="Filter shops by activities and sort order. You can pass multiple activities.",
+        responses={
+            200: openapi.Response(
+                description="List of filtered and sorted shops",
+                examples={
+                    "application/json": [
+                        {"id": 1, "name": "Shop A", "product_count": 12},
+                        {"id": 2, "name": "Shop B", "product_count": 8},
+                    ]
+                }
+            )
+        }
+    )
 
     def get(self, request):
         sort = request.GET.get("sort")
