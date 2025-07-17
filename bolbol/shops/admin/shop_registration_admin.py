@@ -28,3 +28,8 @@ class ShopRegistrationRequestAdmin(admin.ModelAdmin):
         return ", ".join([activity.name for activity in obj.shop_activities.all()])
     
     get_shop_activities.short_description = "Shop Activities"
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if obj.status == ShopRegistrationRequest.APPROVED:  
+            obj.delete()

@@ -42,6 +42,7 @@ class ShopSerializer(serializers.ModelSerializer):
             "logo",
             "city_name",
             "is_active",
+            "contacts",
             "product_count", 
         ]
     
@@ -69,9 +70,10 @@ class ShopDetailSerializer(serializers.ModelSerializer):
             "map_longitude",
             "is_active",
             "activities",
-            "shop_working_hours_data",
+            "working_hours",
             "created_at",
             "updated_at",
+            "contacts",
             "product_count", 
         ]
         
