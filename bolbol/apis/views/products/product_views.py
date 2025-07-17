@@ -32,15 +32,12 @@ from products.serializers import(
 
 __all__ = (
     "ProductCardListAPIView",
-    "ProductCardListByUserAPIView",
     "ProductDetailAPIView",
-    "ProductDetailByUserAPIView",
     "ProductCreateAPIView",
     "ProductUpdateRequestAPIView",
     "SimilarProductListAPIView",
     "RequestProductReactivationAPIView",
-    "BulkDeleteProductsAPIView",
-    
+    "BulkDeleteProductsAPIView",   
 )
 
 
@@ -100,39 +97,6 @@ class ProductCardListAPIView(APIView):
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class ProductCardListByUserAPIView(APIView):
-    """List user's active products with key info."""
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get"]
-
-    @swagger_auto_schema(
-        responses={200: ProductCardSerializer(many=True)},
-        manual_parameters=[
-            openapi.Parameter("is_vip", openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, description="VIP filter"),
-            openapi.Parameter("is_premium", openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, description="Premium filter"),
-        ]
-    )
-    def get(self, request, *args, **kwargs):
-        products = Product.objects.filter(owner=request.user).only(
-            "name", "city__name", "updated_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip"
-        )
-
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
-
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
-
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
-
-        serializer = ProductCardSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class ProductDetailAPIView(APIView):
     """Endpoint to retrieve detailed product information."""
     http_method_names = ["get"]
@@ -143,26 +107,6 @@ class ProductDetailAPIView(APIView):
     def get(self, request, product_slug, *args, **kwargs):
         product_pk = product_slug.split("-", 1)[0]
         product = get_object_or_404(Product, pk=product_pk, is_active=True)
-
-        product.views_count = F("views_count") + 1
-        product.save()
-        product.refresh_from_db()
-
-        serializer = ProductDetailSerializer(product)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class ProductDetailByUserAPIView(APIView):
-    """Retrieve user's active product detail."""
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get"]
-
-    @swagger_auto_schema(
-        responses={200: ProductDetailSerializer()}
-    )
-    def get(self, request, product_slug, *args, **kwargs):
-        product_pk = product_slug.split("-", 1)[0]
-        product = get_object_or_404(Product, pk=product_pk, owner=request.user)
 
         product.views_count = F("views_count") + 1
         product.save()
