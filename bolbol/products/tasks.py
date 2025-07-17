@@ -40,6 +40,7 @@ def send_product_rejected_email_task(user_email, product_slug):
     send_mail_func(user_email, product_slug, subject, message)
 
 
+# Celery beat for deactivate exipred products
 @shared_task
 def deactivate_expired_products_and_send_email_task():
     now = timezone.now()
