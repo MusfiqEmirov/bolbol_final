@@ -38,7 +38,7 @@ services:
     working_dir: /code
     command: celery -A bolbol.bolbol worker --loglevel=info
     environment:
-      - DJANGO_SETTINGS_MODULE=bolbol.settings
+      - DJANGO_SETTINGS_MODULE=bolbol.bolbol.settings
     networks:
       - backend
     
@@ -57,6 +57,8 @@ services:
     networks:
       - backend
     working_dir: /code
+    environment:
+      - DJANGO_SETTINGS_MODULE=bolbol.bolbol.settings
     command: celery -A bolbol.bolbol beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
   db:
