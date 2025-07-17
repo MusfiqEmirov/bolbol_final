@@ -23,11 +23,6 @@ urlpatterns = [
         name="product-cards"
     ),
     path(
-        "product-cards/mine/",
-        ProductCardListByUserAPIView.as_view(),
-        name="user-product-cards"
-    ),
-    path(
         "products/",
         ProductCreateAPIView.as_view(),
         name="product-create"
@@ -36,11 +31,6 @@ urlpatterns = [
         "products/<slug:product_slug>/",
         ProductDetailAPIView.as_view(),
         name="product-detail"
-    ),
-     path(
-        "products/mine/<slug:product_slug>/",
-        ProductDetailByUserAPIView.as_view(),
-        name="user-product-detail"
     ),
     path(
         "similar-products/<slug:product_slug>/",
@@ -105,6 +95,16 @@ urlpatterns = [
         "users/<int:pk>/",
         UserDetailAPIView.as_view(), 
         name="user-detail"
+    ),
+    path(
+        "product-cards/mine/",
+        ProductCardListByUserAPIView.as_view(),
+        name="user-product-cards"
+    ),
+    path(
+        "products/mine/<slug:product_slug>/",
+        ProductDetailByUserAPIView.as_view(),
+        name="user-product-detail"
     ),
 
     # Bookmark endpoints
