@@ -34,7 +34,7 @@ def delete_product_document(sender, instance, **kwargs):
     except Exception:
         pass
 
-
+# Email signals
 @receiver(post_save, sender=ProductUpdateRequest)
 @receiver(post_save, sender=Product)
 def send_created_product_email(sender, instance, created, **kwargs):

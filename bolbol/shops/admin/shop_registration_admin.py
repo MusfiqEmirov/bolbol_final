@@ -30,6 +30,13 @@ class ShopRegistrationRequestAdmin(admin.ModelAdmin):
     get_shop_activities.short_description = "Shop Activities"
 
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if obj.status == ShopRegistrationRequest.APPROVED:  
+        obj.save()  
+        form.save_m2m() 
+        if obj.status == ShopRegistrationRequest.APPROVED:
+            obj.delete()  
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        obj = form.instance
+        if obj.status == ShopRegistrationRequest.APPROVED:
             obj.delete()
