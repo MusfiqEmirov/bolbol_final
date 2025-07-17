@@ -5,7 +5,7 @@ __all__ = [
     'send_mail_func'
 ]
 
-def send_mail_func(user_email, product_slug, custom_subject, custom_message):
+def send_mail_func(user_email, custom_subject, custom_message):
     subject = custom_subject
     message = custom_message
     from_email = settings.EMAIL_HOST_USER
