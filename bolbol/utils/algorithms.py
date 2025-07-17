@@ -9,11 +9,11 @@ def _get_similar_products(main_product: Product,
     Get similar products based on category, city, and shared attributes.
     Uses weighted similarity scoring to rank results by relevance.
     """
-    similar_products = Product.objects.filter(is_active=True,
-                                              category=main_product.category
-                                            ).exclude(
-                                                pk=main_product.pk
-                                            )
+    # similar_products = Product.objects.filter(is_active=True,
+    #                                           category=main_product.category
+    #                                         ).exclude(
+    #                                             pk=main_product.pk
+    #                                         )
     # similarity_cases = Case(
     #     # 80% Similarity - Same category & same city
     #     When(Q(category=main_product.category) & Q(city=main_product.city), then=Value(80)),

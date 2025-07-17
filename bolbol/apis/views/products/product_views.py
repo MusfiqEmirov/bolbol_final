@@ -8,6 +8,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from django.db.models import F
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 
 from utils.helpers import convert_decimal_to_float
 from utils.algorithms import _get_similar_products
@@ -42,6 +45,10 @@ class BulkDeleteProductsAPIView(APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ['delete']
 
+    @swagger_auto_schema(
+        request_body=ProductDeleteSerializer,
+        responses={200: "Products deleted successfully."}
+    )
     def delete(self, request):
         serializer = ProductDeleteSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
@@ -64,6 +71,13 @@ class ProductCardListAPIView(APIView):
     """Endpoint to list products with essential fields."""
     http_method_names = ["get"]
 
+    @swagger_auto_schema(
+        responses={200: ProductCardSerializer(many=True)},
+        manual_parameters=[
+            openapi.Parameter("is_vip", openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, description="VIP filter"),
+            openapi.Parameter("is_premium", openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, description="Premium filter"),
+        ]
+    )
     def get(self, request, *args, **kwargs):
         products = Product.objects.filter(is_active=True).only(
             "name", "city__name", "updated_at", "price",
@@ -83,11 +97,13 @@ class ProductCardListAPIView(APIView):
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
 class ProductDetailAPIView(APIView):
     """Endpoint to retrieve detailed product information."""
     http_method_names = ["get"]
 
+    @swagger_auto_schema(
+        responses={200: ProductDetailSerializer()}
+    )
     def get(self, request, product_slug, *args, **kwargs):
         product_pk = product_slug.split("-", 1)[0]
         product = get_object_or_404(Product, pk=product_pk, is_active=True)
@@ -116,6 +132,14 @@ class RequestProductReactivationAPIView(APIView):
     permission_classes = [IsAuthenticated]
     http_method_names = ['post']
 
+    @swagger_auto_schema(
+        operation_description="Request reactivation of an inactive product by slug.",
+        responses={
+            201: openapi.Response("Reactivation request sent successfully."),
+            400: openapi.Response("Product already active or request already exists."),
+            404: openapi.Response("Product not found."),
+        }
+    )
     def post(self, request, product_slug):
         product_pk = product_slug.split("-", 1)[0]
         try:
@@ -233,6 +257,14 @@ class ProductUpdateRequestAPIView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     http_method_names = ['post']
 
+    @swagger_auto_schema(
+        request_body=ProductUpdateSerializer,
+        responses={
+            202: openapi.Response("Update request submitted for moderation."),
+            400: "Validation error or business logic error (e.g. pending request exists, product inactive or expired).",
+            404: "Product not found."
+        }
+    )
     def post(self, request, product_slug, *args, **kwargs):
         product = get_object_or_404(Product, slug=product_slug, owner=request.user)
 
