@@ -33,6 +33,7 @@ class ShopWorkingHoursSerializer(serializers.ModelSerializer):
 class ShopSerializer(serializers.ModelSerializer):
     contacts = ShopContactSerializer(many=True, read_only=True)
     product_count = serializers.SerializerMethodField(read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
 
     class Meta:
         model = Shop
@@ -54,6 +55,7 @@ class ShopDetailSerializer(serializers.ModelSerializer):
     contacts = ShopContactSerializer(many=True, read_only=True)
     working_hours = ShopWorkingHoursSerializer(many=True, read_only=True)
     product_count = serializers.SerializerMethodField(read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
 
     class Meta:
         model = Shop
