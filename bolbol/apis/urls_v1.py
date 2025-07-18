@@ -92,9 +92,9 @@ urlpatterns = [
 
     # User endpoints
     path(
-        "users/products/expired_at/",
+        "users/products/expired/",
         ProductsExpireAtListByUserAPIView.as_view(),
-        name = "user-expire-at-products"
+        name = "user-expired-products"
     ),
     path(
         "users/products/approved/",
