@@ -15,8 +15,10 @@ from products.serializers import ProductCardSerializer, ProductDetailSerializer
 __all__ = (
     'UserDetailAPIView',
     'UserUpdateAPIView',
-    'ProductCardListByUserAPIView',
+    #'ProductCardListByUserAPIView',
     'ProductDetailByUserAPIView',
+    'ProductPendingListByUserAPIView',
+    'ProductApprovedListByUserAPIView',
 )
 
 User = get_user_model()
@@ -71,49 +73,6 @@ class UserUpdateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProductCardListByUserAPIView(APIView):
-    """List user's active products with key info."""
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get"]
-    @swagger_auto_schema(
-        operation_summary="List current user's products",
-        manual_parameters=[
-            openapi.Parameter(
-                'is_vip',
-                openapi.IN_QUERY,
-                description="Filter by VIP status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'is_premium',
-                openapi.IN_QUERY,
-                description="Filter by Premium status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-        ],
-        responses={200: ProductCardSerializer(many=True)}
-    )
-
-    def get(self, request, *args, **kwargs):
-        products = Product.objects.filter(owner=request.user).only(
-            "name", "city__name", "updated_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip"
-        )
-
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
-
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
-
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
-
-        serializer = ProductCardSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
 class ProductDetailByUserAPIView(APIView):
     """Retrieve user's active product detail."""
     permission_classes = [IsAuthenticated]
@@ -143,3 +102,98 @@ class ProductDetailByUserAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     
+class ProductApprovedListByUserAPIView(APIView):
+    """
+    List current user's approved products.
+    """
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    @swagger_auto_schema(
+        operation_summary="List current user's approved products",
+        manual_parameters=[
+            openapi.Parameter(
+                'is_vip',
+                openapi.IN_QUERY,
+                description="Filter by VIP status (true/false)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+            openapi.Parameter(
+                'is_premium',
+                openapi.IN_QUERY,
+                description="Filter by Premium status (true/false)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+        ],
+        responses={200: ProductCardSerializer(many=True)}
+    )
+    def get(self, request, *args, **kwargs):
+        products = Product.objects.filter(
+            owner=request.user,
+            status=Product.APPROVED
+        ).only(
+            "name", "city__name", "updated_at", "created_at", "price",
+            "is_delivery_available", "is_barter_available", "is_credit_available",
+            "is_super_chance", "is_premium", "is_vip", "slug"
+        )
+
+        is_vip = request.query_params.get("is_vip")
+        is_premium = request.query_params.get("is_premium")
+
+        if is_vip is not None:
+            products = products.filter(is_vip=is_vip.lower() == "true")
+
+        if is_premium is not None:
+            products = products.filter(is_premium=is_premium.lower() == "true")
+
+        serializer = ProductCardSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+class ProductPendingListByUserAPIView(APIView):
+    """
+    List current user's pending products.
+    """
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    @swagger_auto_schema(
+        operation_summary="List current user's pending products",
+        manual_parameters=[
+            openapi.Parameter(
+                'is_vip',
+                openapi.IN_QUERY,
+                description="Filter by VIP status (true/false)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+            openapi.Parameter(
+                'is_premium',
+                openapi.IN_QUERY,
+                description="Filter by Premium status (true/false)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+        ],
+        responses={200: ProductCardSerializer(many=True)}
+    )
+    def get(self, request, *args, **kwargs):
+        products = Product.objects.filter(
+            owner=request.user,
+            status=Product.PENDING
+        ).only(
+            "name", "city__name", "updated_at", "created_at", "price",
+            "is_delivery_available", "is_barter_available", "is_credit_available",
+            "is_super_chance", "is_premium", "is_vip", "slug"
+        )
+
+        is_vip = request.query_params.get("is_vip")
+        is_premium = request.query_params.get("is_premium")
+
+        if is_vip is not None:
+            products = products.filter(is_vip=is_vip.lower() == "true")
+
+        if is_premium is not None:
+            products = products.filter(is_premium=is_premium.lower() == "true")
+
+        serializer = ProductCardSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
