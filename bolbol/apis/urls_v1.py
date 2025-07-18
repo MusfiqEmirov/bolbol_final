@@ -92,15 +92,25 @@ urlpatterns = [
 
     # User endpoints
     path(
+        "users/products/approved/",
+        ProductApprovedListByUserAPIView.as_view(),
+        name="user-approved-products"
+    ),
+    path(
+        "users/products/pending/",
+        ProductPendingListByUserAPIView.as_view(),
+        name="user-pending-products"
+    ),
+    path(
         "users/<int:pk>/",
         UserDetailAPIView.as_view(), 
         name="user-detail"
     ),
-    path(
-        "product-cards/mine/",
-        ProductCardListByUserAPIView.as_view(),
-        name="user-product-cards"
-    ),
+    # path(
+    #     "product-cards/mine/",
+    #     ProductCardListByUserAPIView.as_view(),
+    #     name="user-product-cards"
+    # ),
     path(
         "products/mine/<slug:product_slug>/",
         ProductDetailByUserAPIView.as_view(),
