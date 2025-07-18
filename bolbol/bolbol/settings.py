@@ -32,16 +32,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
+
 PROD = not DEBUG
-
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "pi.backend.az",
-    "localhost",
-    "85.132.18.12", 
-]
-
+if PROD:
+    ALLOWED_HOSTS = [
+        "pi.backend.az",
+        "85.132.18.12",
+    ]
+else:
+    ALLOWED_HOSTS = [
+        "127.0.0.1",
+        "localhost",
+    ]
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
 SECURE_SSL_REDIRECT = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -319,36 +322,46 @@ SWAGGER_SETTINGS = {
         }
     },
     "USE_SESSION_AUTH": False,
-    "DEFAULT_API_URL": "https://pi.backend.az/",
+    
 }
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+if PROD:
+    SWAGGER_SETTINGS["DEFAULT_API_URL"] = "https://pi.backend.az/"
+else:
+    SWAGGER_SETTINGS["DEFAULT_API_URL"] = "http://localhost:8080/"
 
-# AWS S3 configurations
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-north-1')
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+if PROD:
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
 
-#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        "OPTIONS": {
-            "location": "media",
-            "file_overwrite": False,
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "media",
+                "file_overwrite": False,
+            },
         },
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
-        "OPTIONS": {
-            "location": "static",
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+            "OPTIONS": {
+                "location": "static",
+            },
         },
-    },
-}
+    }
 
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+else:
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_URL = "/uploads/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
