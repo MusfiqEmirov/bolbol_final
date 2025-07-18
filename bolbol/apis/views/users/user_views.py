@@ -197,3 +197,22 @@ class ProductPendingListByUserAPIView(APIView):
 
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+class ProductsExpireAtListByUserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+    
+    def get(self, request, *args, **kwargs):
+        products = Product.objects.filter(
+            owner=request.user,
+            status=Product.APPROVED,
+            is_active=False
+        ).only(
+            "name", "city__name", "updated_at", "created_at", "price",
+            "is_delivery_available", "is_barter_available", "is_credit_available",
+            "is_super_chance", "is_premium", "is_vip", "slug"
+        )
+        serializer = ProductCardSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
