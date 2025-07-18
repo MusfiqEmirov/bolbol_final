@@ -92,6 +92,11 @@ urlpatterns = [
 
     # User endpoints
     path(
+        "users/products/expire_at/",
+        ProductsExpireAtListByUserAPIView.as_view(),
+        name = "user-expire-at-products"
+    ),
+    path(
         "users/products/approved/",
         ProductApprovedListByUserAPIView.as_view(),
         name="user-approved-products"
