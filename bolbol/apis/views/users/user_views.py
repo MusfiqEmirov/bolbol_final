@@ -17,9 +17,7 @@ __all__ = (
     'UserUpdateAPIView',
     #'ProductCardListByUserAPIView',
     'ProductDetailByUserAPIView',
-    'ProductPendingListByUserAPIView',
-    'ProductApprovedListByUserAPIView',
-    'ProductsExpireAtListByUserAPIView',
+    'ProductListByUserAPIView',
 )
 
 User = get_user_model()
@@ -103,146 +101,78 @@ class ProductDetailByUserAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     
-class ProductApprovedListByUserAPIView(APIView):
+class ProductListByUserAPIView(APIView):
     """
-    List current user's approved products.
-    """
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get"]
-
-    @swagger_auto_schema(
-        operation_summary="List current user's approved products",
-        manual_parameters=[
-            openapi.Parameter(
-                'is_vip',
-                openapi.IN_QUERY,
-                description="Filter by VIP status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'is_premium',
-                openapi.IN_QUERY,
-                description="Filter by Premium status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-        ],
-        responses={200: ProductCardSerializer(many=True)}
-    )
-    def get(self, request, *args, **kwargs):
-        products = Product.objects.filter(
-            owner=request.user,
-            status=Product.APPROVED
-        ).only(
-            "name", "city__name", "updated_at", "created_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip", "slug"
-        )
-
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
-
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
-
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
-
-        serializer = ProductCardSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-class ProductPendingListByUserAPIView(APIView):
-    """
-    List current user's pending products.
+    List current user's products with filters: status (approved/pending) and activity (active/inactive).
     """
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
 
     @swagger_auto_schema(
-        operation_summary="List current user's pending products",
-        manual_parameters=[
-            openapi.Parameter(
-                'is_vip',
-                openapi.IN_QUERY,
-                description="Filter by VIP status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'is_premium',
-                openapi.IN_QUERY,
-                description="Filter by Premium status (true/false)",
-                type=openapi.TYPE_BOOLEAN
-            ),
-        ],
-        responses={200: ProductCardSerializer(many=True)}
-    )
-    def get(self, request, *args, **kwargs):
-        products = Product.objects.filter(
-            owner=request.user,
-            status=Product.PENDING
-        ).only(
-            "name", "city__name", "updated_at", "created_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip", "slug"
-        )
-
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
-
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
-
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
-
-        serializer = ProductCardSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-
-class ProductsExpireAtListByUserAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-    http_method_names = ["get"]
-    @swagger_auto_schema(
-        operation_summary="List expired (inactive) approved products by user",
+        operation_summary="List current user's products with filters",
         operation_description="""
-        Bu API istifadəçinin **təsdiqlənmiş lakin deaktiv (is_active=False)** məhsullarını qaytarır. 
-        `is_vip` və `is_premium` query parametrləri ilə filtr edilə bilər.
+        Aşağıdakı query parametrlərlə məhsullarınızı filtrləyə bilərsiniz:
+        
+        - `status`: `approved` və ya `pending`
+        - `is_active`: `true` və ya `false`
+        - `is_vip`: `true` və ya `false`
+        - `is_premium`: `true` və ya `false`
         """,
         manual_parameters=[
             openapi.Parameter(
+                'status',
+                openapi.IN_QUERY,
+                description="Məhsul statusu (`approved` və ya `pending`)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'is_active',
+                openapi.IN_QUERY,
+                description="Aktivlik statusu (`true` və ya `false`)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+            openapi.Parameter(
                 'is_vip',
                 openapi.IN_QUERY,
-                description="VIP məhsulları göstər (true/false)",
+                description="VIP məhsulları göstər",
                 type=openapi.TYPE_BOOLEAN
             ),
             openapi.Parameter(
                 'is_premium',
                 openapi.IN_QUERY,
-                description="Premium məhsulları göstər (true/false)",
+                description="Premium məhsulları göstər",
                 type=openapi.TYPE_BOOLEAN
             ),
         ],
         responses={200: ProductCardSerializer(many=True)}
     )
     def get(self, request, *args, **kwargs):
-        products = Product.objects.filter(
-            owner=request.user,
-            status=Product.APPROVED,
-            is_active=False
-        ).only(
+        products = Product.objects.filter(owner=request.user)
+
+        status_param = request.query_params.get("status")
+        if status_param:
+            if status_param.lower() == "approved":
+                products = products.filter(status=Product.APPROVED)
+            elif status_param.lower() == "pending":
+                products = products.filter(status=Product.PENDING)
+
+        is_active = request.query_params.get("is_active")
+        if is_active is not None:
+            products = products.filter(is_active=is_active.lower() == "true")
+
+        is_vip = request.query_params.get("is_vip")
+        if is_vip is not None:
+            products = products.filter(is_vip=is_vip.lower() == "true")
+
+        is_premium = request.query_params.get("is_premium")
+        if is_premium is not None:
+            products = products.filter(is_premium=is_premium.lower() == "true")
+
+        products = products.only(
             "name", "city__name", "updated_at", "created_at", "price",
             "is_delivery_available", "is_barter_available", "is_credit_available",
             "is_super_chance", "is_premium", "is_vip", "slug"
         )
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
-        
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
 
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-        
