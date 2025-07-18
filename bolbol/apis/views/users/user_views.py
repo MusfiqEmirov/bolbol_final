@@ -19,6 +19,7 @@ __all__ = (
     'ProductDetailByUserAPIView',
     'ProductPendingListByUserAPIView',
     'ProductApprovedListByUserAPIView',
+    'ProductsExpireAtListByUserAPIView',
 )
 
 User = get_user_model()
