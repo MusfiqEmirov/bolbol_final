@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import F
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.utils.dateparse import parse_datetime
 
 from django.contrib.auth import get_user_model
 from users.serializers import UserSerializer, UserUpdateSerializer
@@ -100,10 +101,10 @@ class ProductDetailByUserAPIView(APIView):
         serializer = ProductDetailSerializer(product)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    
+
 class ProductListByUserAPIView(APIView):
     """
-    List current user's products with filters: status (approved/pending) and activity (active/inactive).
+    List current user's products with filters: status, activity, VIP, Premium, Expire Date.
     """
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
@@ -117,6 +118,7 @@ class ProductListByUserAPIView(APIView):
         - `is_active`: `true` və ya `false`
         - `is_vip`: `true` və ya `false`
         - `is_premium`: `true` və ya `false`
+        - `expire_at`: `YYYY-MM-DDTHH:MM:SSZ` formatında vaxt (məsələn, 2025-07-20T00:00:00Z)
         """,
         manual_parameters=[
             openapi.Parameter(
@@ -143,12 +145,20 @@ class ProductListByUserAPIView(APIView):
                 description="Premium məhsulları göstər",
                 type=openapi.TYPE_BOOLEAN
             ),
+            openapi.Parameter(
+                'expires_at',
+                openapi.IN_QUERY,
+                description="Son istifadə tarixi (məs: 2025-07-20T00:00:00Z)",
+                type=openapi.TYPE_STRING,
+                format=openapi.FORMAT_DATETIME
+            ),
         ],
         responses={200: ProductCardSerializer(many=True)}
     )
     def get(self, request, *args, **kwargs):
         products = Product.objects.filter(owner=request.user)
 
+        # Status filter
         status_param = request.query_params.get("status")
         if status_param:
             if status_param.lower() == "approved":
@@ -156,23 +166,34 @@ class ProductListByUserAPIView(APIView):
             elif status_param.lower() == "pending":
                 products = products.filter(status=Product.PENDING)
 
+        # is_active filter
         is_active = request.query_params.get("is_active")
         if is_active is not None:
             products = products.filter(is_active=is_active.lower() == "true")
 
+        # is_vip filter
         is_vip = request.query_params.get("is_vip")
         if is_vip is not None:
             products = products.filter(is_vip=is_vip.lower() == "true")
 
+        # is_premium filter
         is_premium = request.query_params.get("is_premium")
         if is_premium is not None:
             products = products.filter(is_premium=is_premium.lower() == "true")
 
+        # expire_at filter
+        expires_at_param = request.query_params.get("expires_at")
+        if expires_at_param:
+            parsed_expires_at = parse_datetime(expires_at_param)
+            if parsed_expires_at:
+                products = products.filter(expires_at__lte=parsed_expires_at)
+
         products = products.only(
             "name", "city__name", "updated_at", "created_at", "price",
             "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip", "slug"
+            "is_super_chance", "is_premium", "is_vip", "slug", "expires_at"
         )
 
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
