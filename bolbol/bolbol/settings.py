@@ -35,7 +35,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
 PROD = not DEBUG
-if not DEBUG:
+if PROD:
     ALLOWED_HOSTS = [
         "pi.backend.az",
         "85.132.18.12",
