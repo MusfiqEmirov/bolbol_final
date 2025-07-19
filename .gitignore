@@ -51,3 +51,11 @@ Thumbs.db
 *.temp
 
 bolbol-docs.*
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Django migrations
+**/migrations/*.py
+!**/migrations/__init__.py
