@@ -31,7 +31,6 @@ jspm_packages/
 
 # dotenv environment variables file
 .env
-local.env
 
 # IDEs and editors
 .idea/
@@ -51,6 +50,3 @@ Thumbs.db
 *.temp
 
 bolbol-docs.*
-
-# Static files
-# static/
