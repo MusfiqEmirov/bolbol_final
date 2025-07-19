@@ -32,10 +32,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
 PROD = not DEBUG
-if PROD:
+if not DEBUG:
     ALLOWED_HOSTS = [
         "pi.backend.az",
         "85.132.18.12",
@@ -46,7 +46,7 @@ else:
         "localhost",
     ]
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = PROD
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
