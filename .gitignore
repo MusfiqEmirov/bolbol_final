@@ -50,3 +50,6 @@ Thumbs.db
 *.temp
 
 bolbol-docs.*
+__pycache__/
+*.py[cod]
+*.djcache
