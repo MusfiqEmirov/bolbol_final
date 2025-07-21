@@ -100,7 +100,7 @@ class UserProductStatusListAPIView(APIView):
     """
     List current user's products with filters: status, activity, expired.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
 
     @swagger_auto_schema(
