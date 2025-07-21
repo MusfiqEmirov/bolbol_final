@@ -17,9 +17,14 @@ from utils.constants import TimeIntervals
 
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file
 ENV_FILE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-load_dotenv(os.path.join(ENV_FILE_DIR, ".env"))
+local_env_path = os.path.join(ENV_FILE_DIR, "local.env")
+global_env_path = os.path.join(ENV_FILE_DIR, ".env")
+
+if os.path.exists(local_env_path):
+    load_dotenv(dotenv_path=local_env_path)
+else:
+    load_dotenv(dotenv_path=global_env_path)
 
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
