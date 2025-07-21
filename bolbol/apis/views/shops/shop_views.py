@@ -133,7 +133,7 @@ class ProductCardListByShopAPIView(APIView):
 
 class ShopProductStatusListAPIView(APIView):
     """
-    List current shop's products with filters: status, activity, VIP, Premium, Expire Date.
+    List current shop's products with filters: status, activity, expire Date.
     """
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]

@@ -13,6 +13,7 @@ from users.serializers import UserSerializer, UserUpdateSerializer
 from products.models import Product
 from products.serializers import ProductCardSerializer, ProductDetailSerializer
 
+
 __all__ = (
     'UserDetailAPIView',
     'UserUpdateAPIView',
@@ -71,18 +72,6 @@ class UserUpdateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-
-    def get(self, request, product_slug, *args, **kwargs):
-        product_pk = product_slug.split("-", 1)[0]
-        product = get_object_or_404(Product, pk=product_pk, owner=request.user)
-
-        product.views_count = F("views_count") + 1
-        product.save()
-        product.refresh_from_db()
-
-        serializer = ProductDetailSerializer(product)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ProductCardListByUserAPIView(APIView):
@@ -109,7 +98,7 @@ class ProductCardListByUserAPIView(APIView):
 
 class UserProductStatusListAPIView(APIView):
     """
-    List current user's products with filters: status, activity, Expire Date.
+    List current user's products with filters: status, activity, expired.
     """
     permission_classes = [AllowAny]
     http_method_names = ["get"]
