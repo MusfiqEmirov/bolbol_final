@@ -111,6 +111,284 @@
                         ]
                       },
                       {
+                        "id": "aiek",
+                        "name": "Aiek",
+                        "childFilters": [
+                          {
+                            "id": "model",
+                            "name": "Model",
+                            "type": "select",
+                            "useForProductName": true,
+                            "options": [
+                              {
+                                "id": "c6",
+                                "name": "C6",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "id": "e1",
+                                "name": "E1",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "gold",
+                                        "name": "gold"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "m3",
+                                "name": "M3",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "gold",
+                                        "name": "gold"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "m4",
+                                "name": "M4",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "blue",
+                                        "name": "blue"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "m5",
+                                "name": "M5",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "blue",
+                                        "name": "blue"
+                                      },
+                                      {
+                                        "id": "green",
+                                        "name": "green"
+                                      },
+                                      {
+                                        "id": "pink",
+                                        "name": "pink"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "m7",
+                                "name": "M7",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "gold",
+                                        "name": "gold"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "m9",
+                                "name": "M9",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "q1",
+                                "name": "Q1",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "gold",
+                                        "name": "gold"
+                                      },
+                                      {
+                                        "id": "purple",
+                                        "name": "purple"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "v5",
+                                "name": "V5",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "gold",
+                                        "name": "gold"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                "id": "x6",
+                                "name": "X6",
+                                "childFilters": [
+                                  {
+                                    "id": "color",
+                                    "name": "Reng",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "black",
+                                        "name": "black"
+                                      },
+                                      {
+                                        "id": "blue",
+                                        "name": "blue"
+                                      },
+                                      {
+                                        "id": "green",
+                                        "name": "green"
+                                      },
+                                      {
+                                        "id": "white",
+                                        "name": "white"
+                                      },
+                                      {
+                                        "id": "yellow",
+                                        "name": "yellow"
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "id": "memory",
+                                    "name": "Yaddas",
+                                    "type": "select",
+                                    "useForProductName": true,
+                                    "options": [
+                                      {
+                                        "id": "32gb_2gb",
+                                        "name": "32gb/2gb"
+                                      },
+                                      {
+                                        "id": "64gb_2gb",
+                                        "name": "64gb/2gb"
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
                         "id": "accessories",
                         "name": "Aksesuarlar"
                       },
@@ -126,7 +404,20 @@
                   }
                 ]
             },
-            "AnotherSubcategory": {}
+            "AnotherSubcategory": {},
+            "NoutbuklarVəNetbuklar": {},
+            "KomponentlərVəMonitorlar": {},
+            "AudioVəVideo": {},
+            "OyunlarPultlarVəProqramlar": {},
+            "KompüterAksesuarları": {},
+            "TelevizorlarVəAksesuarlar": {},
+            "ŞəbəkəVəServerAvadanlığı": {},
+            "NömrələrVəSIM-kartlar": {},
+            "Fototexnika": {},
+            "OfisAvadanlığıVəIstehlakMaterialları": {},
+            "MasaüstüKompüterlər": {},
+            "SmartSaatVəQolbaqlar": {},
+            "PlanşetVəElektronKitablar": {}
         }
     },
     "Ev və Bağ üçün": {

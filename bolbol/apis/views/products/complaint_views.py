@@ -8,6 +8,8 @@ from rest_framework.pagination import PageNumberPagination
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django.db import transaction
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from products.models import ComplaintCategory
 from products.serializers import ComplaintCreateSerializer, ComplaintCategorySerializer
@@ -26,6 +28,16 @@ class ComplaintCategoryAPIView(APIView):
 
     http_method_names = ["get"]
 
+    @swagger_auto_schema(
+        operation_summary="List complaint categories",
+        operation_description="Returns a list of complaint categories. This response is cached for 1 month.",
+        responses={
+            200: openapi.Response(
+                description="List of categories.",
+                schema=ComplaintCategorySerializer(many=True)
+            )
+        }
+    )
     def get(self, request, *args, **kwargs):
         categories = ComplaintCategory.objects.all().order_by("name")
         serializer = ComplaintCategorySerializer(categories, many=True)
@@ -39,6 +51,24 @@ class ComplaintCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
 
+    @swagger_auto_schema(
+        request_body=ComplaintCreateSerializer,
+        operation_summary="Create a complaint",
+        operation_description="Allows an authenticated user to submit a complaint. Rate limiting is applied.",
+        responses={
+            201: openapi.Response(
+                description="Complaint successfully created.",
+                schema=ComplaintCreateSerializer()
+            ),
+            400: openapi.Response(
+                description="Validation error.",
+                examples={"application/json": {"detail": "Field X is required."}}
+            ),
+            401: "Unauthorized",
+            429: "Too Many Requests",
+            500: "Internal Server Error",
+        },
+    )
     def post(self, request, *args, **kwargs):
         serializer = ComplaintCreateSerializer(data=request.data)
         if serializer.is_valid():
