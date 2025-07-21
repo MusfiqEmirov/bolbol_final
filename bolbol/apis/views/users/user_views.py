@@ -17,7 +17,6 @@ __all__ = (
     'UserUpdateAPIView',
     'ProductCardListByUserAPIView',
     'UserProductStatusListAPIView',
-    'ProductListByUserAPIView',
 )
 
 User = get_user_model()
