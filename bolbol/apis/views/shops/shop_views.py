@@ -27,7 +27,7 @@ from utils.constants import TimeIntervals
 __all__ = (
     "ShopListAPIView",
     "ShopDetailAPIView",
-    "ProductCardListByShopAPIView"
+    "ProductCardListByShopAPIView",
     "ShopProductStatusListAPIView",
     "ShopActivityListAPIView",
     "ShopRegistrationRequestAPIView",
