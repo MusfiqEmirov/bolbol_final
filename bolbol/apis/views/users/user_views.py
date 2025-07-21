@@ -6,13 +6,11 @@ from django.shortcuts import get_object_or_404
 from django.db.models import F
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.utils.dateparse import parse_datetime
 
 from django.contrib.auth import get_user_model
 from users.serializers import UserSerializer, UserUpdateSerializer
 from products.models import Product
-from products.serializers import ProductCardSerializer, ProductDetailSerializer
-
+from products.serializers import ProductCardSerializer
 
 __all__ = (
     'UserDetailAPIView',
@@ -85,13 +83,27 @@ class ProductCardListByUserAPIView(APIView):
         Returns a list of active products for a given user by user_id.
 
         Only products with `is_active=True` are returned.
+        You can filter products by category using the `category_id` query parameter.
         """,
+        manual_parameters=[
+            openapi.Parameter(
+                'category_id',
+                openapi.IN_QUERY,
+                description="Filter products by category ID",
+                type=openapi.TYPE_INTEGER
+            ),
+        ],
         responses={200: ProductCardSerializer(many=True)},
     )
 
     def get(self, request, user_id, *args, **kwargs):
         owner = get_object_or_404(User, id=user_id)
         products = Product.objects.filter(owner=owner, is_active=True)
+
+        category_id = request.query_params.get('category_id')
+        if category_id:
+            products = products.filter(category_id=category_id)
+
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

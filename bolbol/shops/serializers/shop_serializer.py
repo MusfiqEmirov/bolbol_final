@@ -55,6 +55,7 @@ class ShopDetailSerializer(serializers.ModelSerializer):
     contacts = ShopContactSerializer(many=True, read_only=True)
     working_hours = ShopWorkingHoursSerializer(many=True, read_only=True)
     product_count = serializers.SerializerMethodField(read_only=True)
+    product_count_by_category = serializers.SerializerMethodField()
     city_name = serializers.CharField(source='city.name', read_only=True)
 
     class Meta:
@@ -82,6 +83,8 @@ class ShopDetailSerializer(serializers.ModelSerializer):
     def get_product_count(self, obj):
         return obj.get_product_count
 
+    def get_product_count_by_category(self, obj):
+        return obj.product_count_by_category
 
 class ShopRegistrationRequestSerializer(serializers.ModelSerializer):
     class Meta:

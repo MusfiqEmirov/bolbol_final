@@ -1,9 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Count
 
 from utils.validators import validate_phone_number
 from utils.helpers import mask_user_fullname
 from .user_manager import UserManager
+from products.models import Product
 
 
 class User(AbstractUser):
@@ -51,6 +53,13 @@ class User(AbstractUser):
     def is_shop_profile(self):
         from shops.models import Shop
         return Shop.objects.filter(owner=self).exists()
+    
+    @property
+    def product_count_by_category(self):
+        return Product.objects.filter(owner=self, is_active=True) \
+            .values('category__id', 'category__name') \
+            .annotate(product_count=Count('id')) \
+            .order_by('category__name')
 
     @property
     def active_products_count(self):

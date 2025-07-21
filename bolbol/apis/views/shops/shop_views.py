@@ -7,7 +7,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.utils.dateparse import parse_datetime
 
 import json
 
@@ -115,18 +114,32 @@ class ProductCardListByShopAPIView(APIView):
     http_method_names = ["get"]
 
     @swagger_auto_schema(
-        operation_summary="List shop's active products",
-        operation_description="""
-        Returns a list of active products for a given shop by `shop_id`.
+    operation_summary="List shop's active products",
+    operation_description="""
+    Returns a list of active products (`is_active=True`) for the specified shop by `shop_id`.
 
-        Only products with `is_active=True` are returned.
-        """,
-        responses={200: ProductCardSerializer(many=True)},
-    )
+    You can optionally filter the products by their `category_id`.
+    """,
+    manual_parameters=[
+        openapi.Parameter(
+            'category_id',
+            openapi.IN_QUERY,
+            description="Optional. Filter products by category ID",
+            type=openapi.TYPE_INTEGER,
+            required=False
+        ),
+    ],
+    responses={200: ProductCardSerializer(many=True)},
+    )   
 
     def get(self, request, shop_id, *args, **kwargs):
         owner = get_object_or_404(Shop, id=shop_id)
         products = Product.objects.filter(owner=owner, is_active=True)
+
+        category_id = request.query_params.get('category_id')
+        if category_id:
+            products = products.filter(category_id=category_id)
+
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
