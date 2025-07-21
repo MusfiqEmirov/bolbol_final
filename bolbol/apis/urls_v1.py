@@ -92,26 +92,21 @@ urlpatterns = [
 
     # User endpoints
     path(
-        "users/products/",
-        ProductListByUserAPIView.as_view(),
-        name='user-product-list'
+        "users/<int:user_id>/product-statuses/",
+        UserProductStatusListAPIView.as_view(),
+        name="user-product-statuses"
+    ),
+    path(
+        "users/<int:user_id>/product-cards/",
+        ProductCardListByUserAPIView.as_view(),
+        name="user-product-cards"
     ),
     path(
         "users/<int:pk>/",
         UserDetailAPIView.as_view(), 
         name="user-detail"
     ),
-    # path(
-    #     "product-cards/mine/",
-    #     ProductCardListByUserAPIView.as_view(),
-    #     name="user-product-cards"
-    # ),
-    path(
-        "products/mine/<slug:product_slug>/",
-        ProductDetailByUserAPIView.as_view(),
-        name="user-product-detail"
-    ),
-
+   
     # Bookmark endpoints
     path(
         "users/bookmarks/", 
@@ -129,6 +124,11 @@ urlpatterns = [
         "shops/shop_id",
         ShopDetailAPIView.as_view(),
         name="shop-profile"
+    ),
+    path(
+        "shops/<int:shop_id>/product-statuses/",
+        ShopProductStatusListAPIView.as_view(),
+        name="shop-product-statuses"
     ),
     path(
         "shops/<int:shop_id>/product-cards/",

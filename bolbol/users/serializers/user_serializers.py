@@ -7,6 +7,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the User model."""
     active_products_count = serializers.SerializerMethodField()
+    product_count_by_category = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -15,11 +16,15 @@ class UserSerializer(serializers.ModelSerializer):
             "full_name",
             "email",
             "is_active",
-            "active_products_count"
+            "active_products_count",
+            "product_count_by_category"
         )
     
     def get_active_products_count(self, obj):
          return obj.active_products_count
+    
+    def get_product_count_by_category(self, obj):
+        return obj.product_count_by_category
 
 
 class ProductOwnerMiniProfileSerializer(serializers.ModelSerializer):

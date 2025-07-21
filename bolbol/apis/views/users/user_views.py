@@ -6,18 +6,17 @@ from django.shortcuts import get_object_or_404
 from django.db.models import F
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.utils.dateparse import parse_datetime
 
 from django.contrib.auth import get_user_model
 from users.serializers import UserSerializer, UserUpdateSerializer
 from products.models import Product
-from products.serializers import ProductCardSerializer, ProductDetailSerializer
+from products.serializers import ProductCardSerializer
 
 __all__ = (
     'UserDetailAPIView',
     'UserUpdateAPIView',
-    #'ProductCardListByUserAPIView',
-    'ProductDetailByUserAPIView',
+    'ProductCardListByUserAPIView',
+    'UserProductStatusListAPIView'
     'ProductListByUserAPIView',
 )
 
@@ -73,38 +72,45 @@ class UserUpdateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProductDetailByUserAPIView(APIView):
-    """Retrieve user's active product detail."""
-    permission_classes = [IsAuthenticated]
+class ProductCardListByUserAPIView(APIView):
+    """List active products of a given user (by user_id)."""
+    permission_classes = [AllowAny]
     http_method_names = ["get"]
+
     @swagger_auto_schema(
-        operation_summary="Retrieve current user's product detail",
+        operation_summary="List user's active products",
+        operation_description="""
+        Returns a list of active products for a given user by user_id.
+
+        Only products with `is_active=True` are returned.
+        You can filter products by category using the `category_id` query parameter.
+        """,
         manual_parameters=[
             openapi.Parameter(
-                'product_slug',
-                openapi.IN_PATH,
-                description="Slug that starts with product ID (e.g. 42-some-product-name)",
-                type=openapi.TYPE_STRING
-            )
+                'category_id',
+                openapi.IN_QUERY,
+                description="Filter products by category ID",
+                type=openapi.TYPE_INTEGER
+            ),
         ],
-        responses={200: ProductDetailSerializer()}
+        responses={200: ProductCardSerializer(many=True)},
     )
 
-    def get(self, request, product_slug, *args, **kwargs):
-        product_pk = product_slug.split("-", 1)[0]
-        product = get_object_or_404(Product, pk=product_pk, owner=request.user)
+    def get(self, request, user_id, *args, **kwargs):
+        owner = get_object_or_404(User, id=user_id)
+        products = Product.objects.filter(owner=owner, is_active=True)
 
-        product.views_count = F("views_count") + 1
-        product.save()
-        product.refresh_from_db()
+        category_id = request.query_params.get('category_id')
+        if category_id:
+            products = products.filter(category_id=category_id)
 
-        serializer = ProductDetailSerializer(product)
+        serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ProductListByUserAPIView(APIView):
+class UserProductStatusListAPIView(APIView):
     """
-    List current user's products with filters: status, activity, VIP, Premium, Expire Date.
+    List current user's products with filters: status, activity, expired.
     """
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
@@ -112,49 +118,33 @@ class ProductListByUserAPIView(APIView):
     @swagger_auto_schema(
         operation_summary="List current user's products with filters",
         operation_description="""
-        Aşağıdakı query parametrlərlə məhsullarınızı filtrləyə bilərsiniz:
-        
-        - `status`: `approved` və ya `pending`
-        - `is_active`: `true` və ya `false`
-        - `is_vip`: `true` və ya `false`
-        - `is_premium`: `true` və ya `false`
-        - `expire_at`: `YYYY-MM-DDTHH:MM:SSZ` formatında vaxt (məsələn, 2025-07-20T00:00:00Z)
+        You can filter your products using the following query parameters:
+
+        - `status`: `approved`, `pending`, `expired`
         """,
         manual_parameters=[
             openapi.Parameter(
                 'status',
                 openapi.IN_QUERY,
-                description="Məhsul statusu (`approved` və ya `pending`)",
+                description="Product status (`approved` or `pending`)",
                 type=openapi.TYPE_STRING
             ),
             openapi.Parameter(
                 'is_active',
                 openapi.IN_QUERY,
-                description="Aktivlik statusu (`true` və ya `false`)",
+                description="Active status (`true` or `false`)",
                 type=openapi.TYPE_BOOLEAN
             ),
             openapi.Parameter(
-                'is_vip',
+                'expired',
                 openapi.IN_QUERY,
-                description="VIP məhsulları göstər",
+                description="Filter expired products (`true`)",
                 type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'is_premium',
-                openapi.IN_QUERY,
-                description="Premium məhsulları göstər",
-                type=openapi.TYPE_BOOLEAN
-            ),
-            openapi.Parameter(
-                'expires_at',
-                openapi.IN_QUERY,
-                description="Son istifadə tarixi (məs: 2025-07-20T00:00:00Z)",
-                type=openapi.TYPE_STRING,
-                format=openapi.FORMAT_DATETIME
-            ),
+            )
         ],
         responses={200: ProductCardSerializer(many=True)}
     )
+
     def get(self, request, *args, **kwargs):
         products = Product.objects.filter(owner=request.user)
 
@@ -171,29 +161,12 @@ class ProductListByUserAPIView(APIView):
         if is_active is not None:
             products = products.filter(is_active=is_active.lower() == "true")
 
-        # is_vip filter
-        is_vip = request.query_params.get("is_vip")
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
-
-        # is_premium filter
-        is_premium = request.query_params.get("is_premium")
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
-
-        # expire_at filter
-        expires_at_param = request.query_params.get("expires_at")
-        if expires_at_param:
-            parsed_expires_at = parse_datetime(expires_at_param)
-            if parsed_expires_at:
-                products = products.filter(expires_at__lte=parsed_expires_at)
-
-        products = products.only(
-            "name", "city__name", "updated_at", "created_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip", "slug", "expires_at"
-        )
+        # expired filter
+        expired_products = request.query_params.get("expired")
+        if expired_products:
+            products = products.filter(is_active=False, status=Product.APPROVED)
 
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 

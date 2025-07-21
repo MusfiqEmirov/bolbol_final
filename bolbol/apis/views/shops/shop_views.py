@@ -27,7 +27,8 @@ from utils.constants import TimeIntervals
 __all__ = (
     "ShopListAPIView",
     "ShopDetailAPIView",
-    "ProductCardListByShopAPIView",
+    "ProductCardListByShopAPIView"
+    "ShopProductStatusListAPIView",
     "ShopActivityListAPIView",
     "ShopRegistrationRequestAPIView",
     "CreateShopContactAPIView",
@@ -108,36 +109,99 @@ class ShopDetailAPIView(APIView):
 
 
 class ProductCardListByShopAPIView(APIView):
+    """List active products of a given user (by shop_id)."""
     permission_classes = [AllowAny]
-    http_method_names = ['get']
-
-    is_vip_param = openapi.Parameter('is_vip', openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, required=False)
-    is_premium_param = openapi.Parameter('is_premium', openapi.IN_QUERY, type=openapi.TYPE_BOOLEAN, required=False)
+    http_method_names = ["get"]
 
     @swagger_auto_schema(
-        manual_parameters=[is_vip_param, is_premium_param],
-        operation_summary="List products by shop",
-        operation_description="Returns products for a given shop ID. Supports filtering by is_vip and is_premium."
-    )
-    def get(self, request, shop_id):
-        shop = get_object_or_404(Shop, id=shop_id)
-        products = Product.objects.filter(is_active=True, owner=shop.owner).only(
-            "name", "city__name", "updated_at", "price",
-            "is_delivery_available", "is_barter_available", "is_credit_available",
-            "is_super_chance", "is_premium", "is_vip"
-        )
+    operation_summary="List shop's active products",
+    operation_description="""
+    Returns a list of active products (`is_active=True`) for the specified shop by `shop_id`.
 
-        is_vip = request.query_params.get("is_vip")
-        is_premium = request.query_params.get("is_premium")
+    You can optionally filter the products by their `category_id`.
+    """,
+    manual_parameters=[
+        openapi.Parameter(
+            'category_id',
+            openapi.IN_QUERY,
+            description="Optional. Filter products by category ID",
+            type=openapi.TYPE_INTEGER,
+            required=False
+        ),
+    ],
+    responses={200: ProductCardSerializer(many=True)},
+    )   
 
-        if is_vip is not None:
-            products = products.filter(is_vip=is_vip.lower() == "true")
+    def get(self, request, shop_id, *args, **kwargs):
+        owner = get_object_or_404(Shop, id=shop_id)
+        products = Product.objects.filter(owner=owner, is_active=True)
 
-        if is_premium is not None:
-            products = products.filter(is_premium=is_premium.lower() == "true")
+        category_id = request.query_params.get('category_id')
+        if category_id:
+            products = products.filter(category_id=category_id)
 
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ShopProductStatusListAPIView(APIView):
+    """
+    List current shop's products with filters: status, activity, expire Date.
+    """
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]
+
+    @swagger_auto_schema(
+        operation_summary="List current shop's products with filters",
+        operation_description="""
+        You can filter your products using the following query parameters:
+
+        - `status`: `approved`, `pending`, `expired`
+        """,
+        manual_parameters=[
+            openapi.Parameter(
+                'status',
+                openapi.IN_QUERY,
+                description="Product status (`approved` or `pending`)",
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                'is_active',
+                openapi.IN_QUERY,
+                description="Active status (`true` or `false`)",
+                type=openapi.TYPE_BOOLEAN
+            ),
+            openapi.Parameter(
+                'expired',
+                openapi.IN_QUERY,
+                description="Filter expired products (`true`)",
+                type=openapi.TYPE_BOOLEAN
+            )
+        ],
+        responses={200: ProductCardSerializer(many=True)}
+
+    )
+    def get(self, request, shop_id, *args, **kwargs):
+        owner = get_object_or_404(Shop, id=shop_id)
+        products = Product.objects.filter(owner=owner)
+
+        # Status filter
+        status_param = request.query_params.get("status")
+        if status_param:
+            if status_param.lower() == "approved":
+                products = products.filter(status=Product.APPROVED)
+            elif status_param.lower() == "pending":
+                products = products.filter(status=Product.PENDING)
+
+        # is_active filter
+        is_active = request.query_params.get("is_active")
+        if is_active is not None:
+            products = products.filter(is_active=is_active.lower() == "true")
+
+        # expired filter
+        expired_products = request.query_params.get("expired")
+        if expired_products:
+            products = products.filter(is_active=False, status=Product.APPROVED)
 
 
 class ShopUpdateAPIView(APIView):
