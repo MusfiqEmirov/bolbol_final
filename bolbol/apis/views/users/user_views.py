@@ -16,7 +16,7 @@ __all__ = (
     'UserDetailAPIView',
     'UserUpdateAPIView',
     'ProductCardListByUserAPIView',
-    'UserProductStatusListAPIView'
+    'UserProductStatusListAPIView',
     'ProductListByUserAPIView',
 )
 
