@@ -8,6 +8,11 @@ app_name = "apis"
 urlpatterns = [
     # Product endpoints
     path(
+        "products/<slug:product_slug>/update-request/",
+        ProductUpdateRequestAPIView.as_view(),
+        name="product-update-request"
+    ),
+    path(
         'products/delete-multiple/',
         BulkDeleteProductsAPIView.as_view(), 
         name='bulk-delete-products'
@@ -195,10 +200,10 @@ urlpatterns = [
         name="comment-create"
     ),
     path(
-        "comments/comment_id", 
-        CommentDeleteAPIView.as_view(), 
-        name="delete-comment"
-    ),
+    "comments/<int:comment_id>/delete/", 
+    CommentDeleteAPIView.as_view(), 
+    name="delete-comment"
+),
 
 
     # Complaints endpoint

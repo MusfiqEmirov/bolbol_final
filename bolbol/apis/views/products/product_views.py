@@ -163,62 +163,6 @@ class RequestProductReactivationAPIView(APIView):
         return Response({"detail": "Reactivation request sent successfully."}, status=201)
 
 
-# class ProductCreateAPIView(APIView):
-#     """Endpoint to create a new product."""
-#     http_method_names = ["post"]
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = ProductCreateSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save(user=request.user)
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class ProductCreateAPIView(APIView):
-#     """
-#     API View for creating a product along with multiple product photos.
-#     """
-#     permission_classes = [AllowAny]  # Or use IsAuthenticated if needed
-#     parser_classes = (MultiPartParser, FormParser)
-
-#     def post(self, request, *args, **kwargs):
-#         owner_data_str = request.data.get("owner")
-
-#         if owner_data_str:
-#             try:
-#                 owner_data = json.loads(owner_data_str)
-#             except json.JSONDecodeError:
-#                 return Response({"error": "Invalid JSON format for owner data"}, status=status.HTTP_400_BAD_REQUEST)
-#         else:
-#             owner_data = {}
-
-#         user = request.user
-
-#         user.full_name = owner_data.get("owner_full_name", user.full_name)
-#         user.email = owner_data.get("owner_email", user.email)
-#         user.save()
-
-#         serializer = ProductCreateSerializer(data=request.data)
-
-#         if serializer.is_valid():
-#             product = serializer.save(owner=request.user)
-
-#             photos_data = request.FILES.getlist("photos")
-#             for index, image in enumerate(photos_data):
-#                 ProductPhoto.objects.create(
-#                     product=product,
-#                     image=image,
-#                     order=index
-#                 )
-
-#             return Response({"id": product.id, "message": "Product created successfully"}, status=status.HTTP_201_CREATED)
-        
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ProductCreateAPIView(APIView):
     """
     API View for creating a product along with multiple product photos.
