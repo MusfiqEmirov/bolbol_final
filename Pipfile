@@ -68,6 +68,7 @@ psycopg2-binary = ">=2.9"
 whitenoise = "*"
 boto3 = "*"
 django-storages = "*"
+pytest = "*"
 
 [dev-packages]
 
