@@ -1,11 +1,18 @@
 from django.urls import path
 from .views import *
+from products.views.category_filter_views import (
+    SubcategoryAPIView,
+    SubcategoryFilterSchemaAPIView,
+)
+
 
 
 
 app_name = "apis"
 
 urlpatterns = [
+    path("categories/<int:category_pk>/subcategories/", SubcategoryAPIView.as_view(), name="subcategory-list"),
+    path("categories/<int:category_pk>/subcategories/<int:subcategory_pk>/filters/", SubcategoryFilterSchemaAPIView.as_view(), name="subcategory-filters"),
     # Product endpoints
     path(
         "products/<slug:product_slug>/update-request/",

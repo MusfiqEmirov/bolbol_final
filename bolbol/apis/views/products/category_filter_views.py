@@ -4,6 +4,10 @@ from rest_framework import status
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
+
 from products.models import Category, CategoryFilterField
 from products.serializers import CategorySerializer, SubcategorySerializer
 from utils.constants import TimeIntervals
@@ -185,6 +189,18 @@ filter_data = {
 
 @method_decorator(cache_page(TimeIntervals.ONE_MIN_IN_SEC), name="dispatch")
 class SubcategoryFilterSchemaAPIView(APIView):
+
+    @swagger_auto_schema(
+        operation_description="Filter schema for given subcategory",
+        responses={
+            200: openapi.Response(
+                description="Filter schema JSON",
+                examples={
+                    "application/json": filter_data.get("Elektronika", {}).get("subcategories", {}).get("Telefonlar", {})
+                }
+            )
+        }
+    )
     def get(self, request, category_pk, subcategory_pk, *args, **kwargs):
         parent_category = Category.objects.get(pk=category_pk, is_active=True)
         subcategory = Category.objects.get(pk=subcategory_pk, is_active=True)
