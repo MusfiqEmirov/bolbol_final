@@ -221,12 +221,12 @@ urlpatterns = [
 
 category_related_urlpatterns = [
     path(
-        "categories/<int:category_pk>/subcategories/",
-        SubcategoryAPIView.as_view(),
-        name="subcategory-list"
+        "categories/<str:category_name>/",
+        CategoryFilterSchemaAPIView.as_view(),
+        name="category-list"
     ),
     path(
-        "filter-schemas/<int:category_pk>/<int:subcategory_pk>/",
+        "filter-schemas/<str:category_name>/<str:subcategory_name>/",
         SubcategoryFilterSchemaAPIView.as_view(),
         name="subcategory-filter-schema"
     )
