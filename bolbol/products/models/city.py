@@ -1,7 +1,7 @@
 from django.db import models
 
-__all__ = ("City",)
 
+__all__ = ("City",)
 
 class City(models.Model):
     name = models.CharField(

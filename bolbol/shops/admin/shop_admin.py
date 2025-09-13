@@ -5,7 +5,6 @@ from shops.models import (
     ShopWorkingHours
 )
 
-
 class ShopContactInline(admin.TabularInline):
     model = ShopContact
     extra = 1
@@ -20,13 +19,15 @@ class ShopWorkingHoursInline(admin.TabularInline):
 
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
-    list_display = ("name", "get_owner_username", "is_active", "created_at", "updated_at")
+    list_display = ("name", "get_owner_username", "get_product_count", "is_active", "created_at", "updated_at")
     list_filter = ("is_active", "created_at", "updated_at")
     search_fields = ("name", "owner__username", "address")
     readonly_fields = ("created_at", "updated_at")
+    filter_horizontal = ("activities",)
+
     fieldsets = (
         ("Basic Information", {
-            "fields": ("name", "logo", "bio", "background_image")
+            "fields": ("name", "logo", "bio", "background_image", "activities") 
         }),
         ("Location", {
             "fields": ("address", "map_link", "map_latitude", "map_longitude")
@@ -42,6 +43,8 @@ class ShopAdmin(admin.ModelAdmin):
 
     def get_owner_username(self, obj):
         return obj.owner.username if obj.owner else "No Owner"
-
     get_owner_username.short_description = "Owner"
 
+    def get_product_count(self, obj):
+        return obj.get_product_count
+    get_product_count.short_description = "Product Count"

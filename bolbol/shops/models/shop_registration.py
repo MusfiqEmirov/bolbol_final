@@ -57,14 +57,14 @@ class ShopRegistrationRequest(models.Model):
         return f"{self.shop_name}"
     
     def save(self, *args, **kwargs):
-        # print(1, self.shop_activities)
-        if self.status == self.APPROVED:
+        creating = self.pk is None  
+        super().save(*args, **kwargs) 
+
+        if creating and self.status == self.APPROVED:
             from shops.models import Shop
-            if not Shop.objects.filter(owner=self.shop_owner, is_active=True):
+            if not Shop.objects.filter(owner=self.shop_owner, is_active=True).exists():
                 shop = Shop.objects.create(
                     owner=self.shop_owner,
                     name=self.shop_name,
                 )
-                print(self.shop_activities)
-                shop.activities.set(self.shop_activities.all())
-        return super().save(*args, **kwargs)
+                shop.activities.set(self.shop_activities.all()) 

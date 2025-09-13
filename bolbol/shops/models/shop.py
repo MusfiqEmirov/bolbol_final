@@ -2,6 +2,9 @@ from django.conf import settings
 from django.db import models
 from utils.validators import validate_phone_number
 from utils.constants import TimeIntervals
+from django.db.models import Count
+
+from products.models import Product
 
 __all__ = (
     "Shop",
@@ -109,6 +112,19 @@ class Shop(models.Model):
     class Meta:
         verbose_name = "Shop"
         verbose_name_plural = "Shops"
+    
+    @property
+    def get_product_count(self):
+        return Product.objects.filter(
+            is_active=True, owner=self.owner
+        ).count()
+    
+    @property
+    def product_count_by_category(self):
+        return Product.objects.filter(owner=self, is_active=True) \
+            .values('category__id', 'category__name') \
+            .annotate(product_count=Count('id')) \
+            .order_by('category__name')
 
     def __str__(self):
         return f"{self.name}"

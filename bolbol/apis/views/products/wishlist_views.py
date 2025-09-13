@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from products.models import Product, Wishlist
 from products.serializers import ProductCardSerializer
@@ -19,6 +21,10 @@ class BookmarkAPIView(APIView):
     http_method_names = ["get", "post"]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        operation_description="Get all products in the user's wishlist.",
+        responses={200: ProductCardSerializer(many=True)}
+    )
     def get(self, request, *args, **kwargs):
         """
         Retrieve all products bookmarked by the authenticated user.
@@ -29,7 +35,23 @@ class BookmarkAPIView(APIView):
 
         serializer = ProductCardSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
+    
+    @swagger_auto_schema(
+        operation_description="Bookmark or remove bookmark from a product.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["product_id"],
+            properties={
+                "product_id": openapi.Schema(type=openapi.TYPE_INTEGER, description="ID of the product to bookmark or unbookmark"),
+            },
+        ),
+        responses={
+            200: openapi.Response(description="Product removed from wishlist."),
+            201: openapi.Response(description="Product added to wishlist."),
+            400: "Product ID is required.",
+            401: "Authentication required.",
+        }
+    )
     def post(self, request, *args, **kwargs):
         product_id = request.data.get("product_id")
         if not product_id:

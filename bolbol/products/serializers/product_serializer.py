@@ -112,10 +112,56 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             "characteristics"
         ]
         
-
-class ProductDeleteMultipleSerializer(serializers.Serializer):
+        
+class ProductDeleteSerializer(serializers.Serializer):
     ids = serializers.ListField(
-        child=serializers.IntegerField(), 
+        child=serializers.IntegerField(),
+        required=True,
         allow_empty=False,
-        help_text="List of product IDs to delete"
+        help_text="List of product IDs to delete."
     )
+
+    def validate_ids(self, value):
+        """
+        Validation:
+        - Are all the provided IDs associated with existing products?
+        - If the user is not an admin, they can only delete their own products.
+        """
+        user = self.context['request'].user
+        all_requested_products = Product.objects.filter(id__in=value)
+
+        existing_ids = set(all_requested_products.values_list('id', flat=True))
+        invalid_ids = [i for i in value if i not in existing_ids]
+        if invalid_ids:
+            raise serializers.ValidationError(f"Invalid product IDs: {invalid_ids}")
+
+        if not user.is_staff:
+            unauthorized_products = all_requested_products.exclude(owner=user)
+            if unauthorized_products.exists():
+                unauthorized_ids = list(unauthorized_products.values_list('id', flat=True))
+                raise serializers.ValidationError(
+                    f"These product(s) do not belong to you. You are not authorized to delete them.: {unauthorized_ids}"
+                )
+
+        return value
+
+      
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for update a product with all fields.
+    """
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "category",
+            "city",
+            "price",
+            "description",
+            "is_new_product",
+            "is_delivery_available",
+            "is_credit_available",
+            "is_barter_available",
+            "is_via_negotiator",
+            "characteristics"
+        ]

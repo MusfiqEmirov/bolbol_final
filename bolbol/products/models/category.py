@@ -12,7 +12,6 @@ __all__ = (
 )
 
 
-
 class CategoryQuerySet(models.QuerySet):
     def with_product_counts(self):
         return self.annotate(product_count=Count("products"))

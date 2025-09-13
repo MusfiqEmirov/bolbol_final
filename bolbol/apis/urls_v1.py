@@ -8,14 +8,19 @@ app_name = "apis"
 urlpatterns = [
     # Product endpoints
     path(
+        "products/<slug:product_slug>/update-request/",
+        ProductUpdateRequestAPIView.as_view(),
+        name="product-update-request"
+    ),
+    path(
         'products/delete-multiple/',
-        delete_multiple_products, 
+        BulkDeleteProductsAPIView.as_view(), 
         name='bulk-delete-products'
     ),
     path(
-        "search/",
-        ProductSearchAPIView.as_view(),
-        name="product-search"
+        "products/search/",
+        ProductsSearchAPIView.as_view(),
+        name="products-search"
     ),
     path(
         "product-cards/",
@@ -37,7 +42,11 @@ urlpatterns = [
         SimilarProductListAPIView.as_view(),
         name="similar-product-list"
     ),
-
+    path(
+        "products/reactivation/<slug:product_slug>/",
+        RequestProductReactivationAPIView.as_view(),
+        name="reactivation-product"
+    ),
     path(
         "transport-products/",
         TransportProductFilterAPIView.as_view(),
@@ -88,11 +97,21 @@ urlpatterns = [
 
     # User endpoints
     path(
+        "users/<int:user_id>/product-statuses/",
+        UserProductStatusListAPIView.as_view(),
+        name="user-product-statuses"
+    ),
+    path(
+        "users/<int:user_id>/product-cards/",
+        ProductCardListByUserAPIView.as_view(),
+        name="user-product-cards"
+    ),
+    path(
         "users/<int:pk>/",
         UserDetailAPIView.as_view(), 
         name="user-detail"
     ),
-
+   
     # Bookmark endpoints
     path(
         "users/bookmarks/", 
@@ -107,6 +126,41 @@ urlpatterns = [
         name="shop-list"
     ),
     path(
+        "shops/<int:shop_id>/",
+        ShopDetailAPIView.as_view(),
+        name="shop-profile"
+    ),
+    path(
+        "shops/<int:shop_id>/product-statuses/",
+        ShopProductStatusListAPIView.as_view(),
+        name="shop-product-statuses"
+    ),
+    path(
+        "shops/<int:shop_id>/product-cards/",
+        ProductCardListByShopAPIView.as_view(),
+        name="shop-product-cards"
+    ),
+    path(
+        "shops/contacts/",
+        CreateShopContactAPIView.as_view(),
+        name="create-shop-contacts"
+    ),
+    path(
+        "shops/working-hours/",
+        ShopWorkingHoursAPIView.as_view(),
+        name="create-working-hours"
+    ),
+    path(
+        "shops/<int:contact_id>/contacts/",
+        ShopContactsAPIView.as_view(),
+        name="shop-contacts"
+    ),
+    path(
+        "shops/<int:working_hours_id>/working-hours/",
+        ShopWorkingHoursAPIView.as_view(),
+        name="shop-working-hours"
+    ),
+    path(
         "shop-activities/",
         ShopActivityListAPIView.as_view(), 
         name="shop-activity-list"
@@ -115,6 +169,16 @@ urlpatterns = [
         "shop-registration-requests/",
         ShopRegistrationRequestAPIView.as_view(),
         name="shop-registration-request"
+    ),
+    path(
+        "shops/search/",
+        ShopsSearchAPIView.as_view(),
+        name="shops-search"
+    ),
+    path(
+        "shops/filter/",
+        ShopFilterAPIView.as_view(),
+        name="shops-filter"
     ),
 
     # Partner Companies endpoint
@@ -135,6 +199,12 @@ urlpatterns = [
         CommentCreateAPIView.as_view(), 
         name="comment-create"
     ),
+    path(
+    "comments/<int:comment_id>/delete/", 
+    CommentDeleteAPIView.as_view(), 
+    name="delete-comment"
+),
+
 
     # Complaints endpoint
     path(

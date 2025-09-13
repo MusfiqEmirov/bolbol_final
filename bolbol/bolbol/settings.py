@@ -17,12 +17,19 @@ from utils.constants import TimeIntervals
 
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file
 ENV_FILE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-load_dotenv(os.path.join(ENV_FILE_DIR, ".env"))
+local_env_path = os.path.join(ENV_FILE_DIR, "local.env")
+global_env_path = os.path.join(ENV_FILE_DIR, ".env")
+
+if os.path.exists(local_env_path):
+    load_dotenv(dotenv_path=local_env_path)
+else:
+    load_dotenv(dotenv_path=global_env_path)
 
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,17 +39,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
 
 # SECURITY WARNING: don"t run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+
 PROD = not DEBUG
-
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "pi.backend.az",
-    "localhost",
-]
-
+if PROD:
+    ALLOWED_HOSTS = [
+        "pi.backend.az",
+        "85.132.18.12",
+    ]
+else:
+    ALLOWED_HOSTS = [
+        "127.0.0.1",
+        "localhost",
+    ]
 # Disable SECURE_SSL_REDIRECT to prevent conflict with Nginx
-SECURE_SSL_REDIRECT = False
+SECURE_SSL_REDIRECT = PROD
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -74,6 +85,7 @@ CSRF_TRUSTED_ORIGINS = [
     # "https://www.konum24.az",
     "https://bolbol-three.vercel.app",
     "http://bolbol-three.vercel.app",
+    "https://85.132.18.12",  
 ]
 
 INSTALLED_APPS = [
@@ -91,9 +103,11 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "drf_yasg",
     "celery",
+    "django_celery_beat",
     "django_celery_results",
     "redis",
-    'django_elasticsearch_dsl',
+    "django_elasticsearch_dsl",
+    'storages',
 
     # Apps
     "users",
@@ -114,7 +128,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 ROOT_URLCONF = "bolbol.urls"
 
 TEMPLATES = [
@@ -140,9 +154,17 @@ WSGI_APPLICATION = "bolbol.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3"
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
+        'CONN_MAX_AGE': 600,  
+        'OPTIONS': {
+            'sslmode': 'disable',
+        },
     }
 }
 
@@ -177,15 +199,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
-MEDIA_URL = "uploads/"
-MEDIA_ROOT = BASE_DIR / "uploads"   
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -198,15 +211,24 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.1/howto/static-files/
+
+# STATIC_URL = "static/"
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+# MEDIA_URL = "uploads/"
+# MEDIA_ROOT = BASE_DIR / "uploads"   
+
 # JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=365),
-    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=2),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=int(os.getenv('ACCESS_TOKEN_LIFETIME_DAYS'))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=int(os.getenv('REFRESH_TOKEN_LIFETIME_WEEKS'))),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-    "AUTH_HEADER_TYPES": ("bolbol",),
+    "AUTH_HEADER_TYPES": (os.getenv('JWT_AUTH_HEADER_TYPE'))
 }
 
 # SMS-notifications
@@ -225,6 +247,17 @@ CELERY_RESULT_BACKEND = "django-cache"
 # CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
 # CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379")
 CELERY_BROKER_URL = 'redis://redis:6379/0'
+
+# Celery beat 
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "deactivate-expired-products-daily": {
+        "task": "products.tasks.deactivate_expired_products",
+        "schedule": crontab(hour=0, minute=0),  # Every night at 0:00 clock
+    },
+}
+
 # Cache
 CACHES = {
     "default": {
@@ -261,13 +294,20 @@ CACHES = {
 # }
 
 # E-mail
-EMAIL_BACKEND ='bolbol.email_backend.EmailBackend'
-EMAIL_HOST = 'mail.smtp2go.com'
-EMAIL_PORT = 2525
-EMAIL_HOST_USER = 'noreply@bolbol.az'
-EMAIL_HOST_PASSWORD = 'c2dnbDRoN2phdmkw'
+# EMAIL_BACKEND ='bolbol.email_backend.EmailBackend'
+# EMAIL_HOST = 'mail.smtp2go.com'
+# EMAIL_PORT = 2525
+# EMAIL_HOST_USER = 'noreply@bolbol.az'
+# EMAIL_HOST_PASSWORD = 'c2dnbDRoN2phdmkw'
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'ebilebilli3@gmail.com'
+EMAIL_HOST_PASSWORD = 'ypzgghresnlbfjza'
 
 # DATA_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
 # FILE_UPLOAD_MAX_MEMORY_SIZE = 2621440*20*2 # 100 MB
@@ -289,5 +329,47 @@ SWAGGER_SETTINGS = {
         }
     },
     "USE_SESSION_AUTH": False,
-    "DEFAULT_API_URL": "https://pi.backend.az/",
+    
 }
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+
+if PROD:
+    SWAGGER_SETTINGS["DEFAULT_API_URL"] = "https://pi.backend.az/"
+else:
+    SWAGGER_SETTINGS["DEFAULT_API_URL"] = "http://localhost:8080/"
+
+if PROD:
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "media",
+                "file_overwrite": False,
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "location": "static",
+            },
+        },
+    }
+
+    # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    # DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+else:
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+    MEDIA_URL = "/uploads/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"

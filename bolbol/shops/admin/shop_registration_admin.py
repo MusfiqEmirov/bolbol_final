@@ -28,3 +28,5 @@ class ShopRegistrationRequestAdmin(admin.ModelAdmin):
         return ", ".join([activity.name for activity in obj.shop_activities.all()])
     
     get_shop_activities.short_description = "Shop Activities"
+
+    
