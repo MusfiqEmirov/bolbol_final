@@ -4,7 +4,8 @@ from rest_framework import status
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
-from drf_spectacular.utils import extend_schema
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from products.models import Category, CategoryFilterField
 from products.serializers import CategorySerializer, SubcategorySerializer
@@ -185,55 +186,53 @@ filter_data = {
     }
 }
 
-
 @method_decorator(cache_page(TimeIntervals.ONE_MIN_IN_SEC), name="dispatch")
 class CategoryFilterSchemaAPIView(APIView):
-    @extend_schema(
-        summary="Get subcategories of a category",
-        description="Returns all subcategories belonging to the given `category_name`.",
-        parameters=[
-            OpenApiParameter(
+    @swagger_auto_schema(
+        operation_summary="Get subcategories of a category",
+        operation_description="Returns all subcategories belonging to the given `category_name`.",
+        manual_parameters=[
+            openapi.Parameter(
                 name="category_name",
+                in_=openapi.IN_PATH,
                 description="Category name (e.g., electronics)",
+                type=openapi.TYPE_STRING,
                 required=True,
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
             )
         ],
-        responses={200: dict},
+        responses={200: openapi.Schema(type=openapi.TYPE_OBJECT)}
     )
     def get(self, request, *args, **kwargs):
-        category_name = kwargs.get("category_name").strip().lower() 
+        category_name = kwargs.get("category_name").strip().lower()
         subcategories = filter_data.get(category_name, {}).get("subcategories", {})
         return Response(subcategories, status=status.HTTP_200_OK)
 
 
 @method_decorator(cache_page(TimeIntervals.ONE_MIN_IN_SEC), name="dispatch")
 class SubcategoryFilterSchemaAPIView(APIView):
-    @extend_schema(
-        summary="Get filters of a subcategory",
-        description="Returns filter schema for the given `category_name` and `subcategory_name`.",
-        parameters=[
-            OpenApiParameter(
+    @swagger_auto_schema(
+        operation_summary="Get filters of a subcategory",
+        operation_description="Returns filter schema for the given `category_name` and `subcategory_name`.",
+        manual_parameters=[
+            openapi.Parameter(
                 name="category_name",
+                in_=openapi.IN_PATH,
                 description="Category name (e.g., electronics)",
+                type=openapi.TYPE_STRING,
                 required=True,
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
             ),
-            OpenApiParameter(
+            openapi.Parameter(
                 name="subcategory_name",
+                in_=openapi.IN_PATH,
                 description="Subcategory name (e.g., phones)",
+                type=openapi.TYPE_STRING,
                 required=True,
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.PATH,
             ),
         ],
-        responses={200: dict},
+        responses={200: openapi.Schema(type=openapi.TYPE_OBJECT)}
     )
     def get(self, request, *args, **kwargs):
-        category_name = kwargs.get("category_name").strip().lower()      
-        subcategory_name = kwargs.get("subcategory_name").strip().lower() 
+        category_name = kwargs.get("category_name").strip().lower()
+        subcategory_name = kwargs.get("subcategory_name").strip().lower()
         filter_schema = filter_data.get(category_name, {}).get("subcategories", {}).get(subcategory_name, {})
-
         return Response(filter_schema, status=status.HTTP_200_OK)
