@@ -4,6 +4,8 @@ from rest_framework import status
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
+from drf_spectacular.utils import extend_schema
+
 from products.models import Category, CategoryFilterField
 from products.serializers import CategorySerializer, SubcategorySerializer
 from utils.constants import TimeIntervals
