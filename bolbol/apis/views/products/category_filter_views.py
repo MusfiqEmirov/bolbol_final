@@ -4,19 +4,16 @@ from rest_framework import status
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-
-
 from products.models import Category, CategoryFilterField
 from products.serializers import CategorySerializer, SubcategorySerializer
 from utils.constants import TimeIntervals
 
+
 __all__ = (
     "SubcategoryAPIView",
+    "CategoryFilterSchemaAPIView",
     "SubcategoryFilterSchemaAPIView"
 )
-
 
 class SubcategoryAPIView(APIView):
     def get(self, request, category_pk, *args, **kwargs):
@@ -188,23 +185,53 @@ filter_data = {
 
 
 @method_decorator(cache_page(TimeIntervals.ONE_MIN_IN_SEC), name="dispatch")
-class SubcategoryFilterSchemaAPIView(APIView):
-
-    @swagger_auto_schema(
-        operation_description="Filter schema for given subcategory",
-        responses={
-            200: openapi.Response(
-                description="Filter schema JSON",
-                examples={
-                    "application/json": filter_data.get("Elektronika", {}).get("subcategories", {}).get("Telefonlar", {})
-                }
+class CategoryFilterSchemaAPIView(APIView):
+    @extend_schema(
+        summary="Get subcategories of a category",
+        description="Returns all subcategories belonging to the given `category_name`.",
+        parameters=[
+            OpenApiParameter(
+                name="category_name",
+                description="Category name (e.g., electronics)",
+                required=True,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
             )
-        }
+        ],
+        responses={200: dict},
     )
-    def get(self, request, category_pk, subcategory_pk, *args, **kwargs):
-        parent_category = Category.objects.get(pk=category_pk, is_active=True)
-        subcategory = Category.objects.get(pk=subcategory_pk, is_active=True)
-        parent_name = parent_category.name
-        sub_name = subcategory.name
-        filter_schema = filter_data.get("Elektronika", {}).get("subcategories", {}).get("Telefonlar", {})
+    def get(self, request, *args, **kwargs):
+        category_name = kwargs.get("category_name").strip().lower() 
+        subcategories = filter_data.get(category_name, {}).get("subcategories", {})
+        return Response(subcategories, status=status.HTTP_200_OK)
+
+
+@method_decorator(cache_page(TimeIntervals.ONE_MIN_IN_SEC), name="dispatch")
+class SubcategoryFilterSchemaAPIView(APIView):
+    @extend_schema(
+        summary="Get filters of a subcategory",
+        description="Returns filter schema for the given `category_name` and `subcategory_name`.",
+        parameters=[
+            OpenApiParameter(
+                name="category_name",
+                description="Category name (e.g., electronics)",
+                required=True,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+            ),
+            OpenApiParameter(
+                name="subcategory_name",
+                description="Subcategory name (e.g., phones)",
+                required=True,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+            ),
+        ],
+        responses={200: dict},
+    )
+    def get(self, request, *args, **kwargs):
+        category_name = kwargs.get("category_name").strip().lower()      
+        subcategory_name = kwargs.get("subcategory_name").strip().lower() 
+        filter_schema = filter_data.get(category_name, {}).get("subcategories", {}).get(subcategory_name, {})
+
         return Response(filter_schema, status=status.HTTP_200_OK)
