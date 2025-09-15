@@ -195,7 +195,7 @@ class CategoryFilterSchemaAPIView(APIView):
             openapi.Parameter(
                 name="category_name",
                 in_=openapi.IN_PATH,
-                description="Category name (e.g., electronics)",
+                description="Category name (e.g., Elektronika)",
                 type=openapi.TYPE_STRING,
                 required=True,
             )
@@ -203,7 +203,7 @@ class CategoryFilterSchemaAPIView(APIView):
         responses={200: openapi.Schema(type=openapi.TYPE_OBJECT)}
     )
     def get(self, request, *args, **kwargs):
-        category_name = kwargs.get("category_name").strip().lower()
+        category_name = kwargs.get("category_name")
         subcategories = filter_data.get(category_name, {}).get("subcategories", {})
         return Response(subcategories, status=status.HTTP_200_OK)
 
@@ -217,14 +217,14 @@ class SubcategoryFilterSchemaAPIView(APIView):
             openapi.Parameter(
                 name="category_name",
                 in_=openapi.IN_PATH,
-                description="Category name (e.g., electronics)",
+                description="Category name (e.g., Elektronika)",
                 type=openapi.TYPE_STRING,
                 required=True,
             ),
             openapi.Parameter(
                 name="subcategory_name",
                 in_=openapi.IN_PATH,
-                description="Subcategory name (e.g., phones)",
+                description="Subcategory name (e.g., Telefonlar)",
                 type=openapi.TYPE_STRING,
                 required=True,
             ),
@@ -232,7 +232,7 @@ class SubcategoryFilterSchemaAPIView(APIView):
         responses={200: openapi.Schema(type=openapi.TYPE_OBJECT)}
     )
     def get(self, request, *args, **kwargs):
-        category_name = kwargs.get("category_name").strip().lower()
-        subcategory_name = kwargs.get("subcategory_name").strip().lower()
+        category_name = kwargs.get("category_name")
+        subcategory_name = kwargs.get("subcategory_name")
         filter_schema = filter_data.get(category_name, {}).get("subcategories", {}).get(subcategory_name, {})
         return Response(filter_schema, status=status.HTTP_200_OK)
