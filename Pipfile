@@ -69,6 +69,7 @@ whitenoise = "*"
 boto3 = "*"
 django-storages = "*"
 pytest = "*"
+drf-spectacular = "*"
 
 [dev-packages]
 
