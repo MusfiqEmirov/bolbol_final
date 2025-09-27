@@ -81,6 +81,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 CSRF_TRUSTED_ORIGINS = [
     "https://pi.backend.az",
     "http://localhost:8000",
+    "http://localhost:3000",
     # "https://konum24.az",
     # "https://www.konum24.az",
     "https://bolbol-three.vercel.app",
