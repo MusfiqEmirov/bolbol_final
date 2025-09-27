@@ -84,6 +84,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     # "https://konum24.az",
     # "https://www.konum24.az",
+    "https://bolbol-five.vercel.app",
     "https://bolbol-three.vercel.app",
     "http://bolbol-three.vercel.app",
     "https://85.132.18.12",  
